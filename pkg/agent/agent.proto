@@ -1,0 +1,185 @@
+// SPDX-License-Identifier: Apache-2.0 OR GPL-2.0-or-later
+syntax = "proto3";
+
+package agent;
+
+// Agent defines the GRPC interface provided by an Agent that can talk
+// to a peridot controller.
+service Agent {
+    // NewJob is the only RPC endpoint that an Agent provides. It
+    // is a bidirectional streaming RPC that enables the Controller to
+    // send messages to the Agent, and vice versa. It will remain open
+    // during the lifetime of a given Job and its early termination
+    // means that the Job should be treated as failed.
+    rpc NewJob(stream ControllerMsg) returns (stream AgentMsg) {}
+}
+
+// ControllerMsg can consist of one of the available types of
+// messages from the main controller to the Agent.
+message ControllerMsg {
+    oneof cm {
+        DescribeReq describe = 1;
+        StartReq start = 2;
+        StatusReq status = 3;
+        CancelReq cancel = 4;
+    }
+}
+
+// AgentMsg can consist of one of the available types of messages from the
+// Agent to the main controller.
+message AgentMsg {
+    oneof am {
+        DescribeReport describe = 1;
+        StatusReport status = 2;
+    }
+}
+
+// DescribeReq requests information about the Agent instance over its
+// lifetime (and not information specific to this Job).
+message DescribeReq {}
+
+// JobConfig defines the configuration for a job.
+// Relevance of configuration details will depend upon the Agent's
+// capabilities.
+message JobConfig {
+    // codereader: code paths under analysis
+    message CodeInput {
+        // short description of this code input.
+        // "primary" means that it is the primary code under analysis;
+        // most codereader agents will expect a "primary" input.
+        // otherwise, may be e.g. agent name for the upstream agent that
+        // retrieved and placed the code in place.
+        // if the Agent is also an spdxreader, then the CodeInput could
+        // have a corresponding SpdxInput describing it in further detail.
+        string source = 1;
+
+        // paths to directories or files to be analyzed
+        repeated string paths = 2;
+    }
+    repeated CodeInput codeInputs = 1;
+
+    // codewriter: directory where code can be written
+    string codeOutputDir = 2;
+
+    // spdxreader: paths to multiple earlier SPDX files which may be reused
+    message SpdxInput {
+        // short description for source of SPDX file; may be e.g. agent name,
+        // "former" for former known good SPDX files; etc.
+        // don't try to include too much detail here; the agent can read the
+        // SPDX file and get more data if it wants to. this is just meant to
+        // give enough info to the agent to decide whether it potentially
+        // cares about the file at all.
+        string source = 1;
+
+        // paths to SPDX files (or directories containing them) for this source
+        repeated string paths = 2;
+    }
+    repeated SpdxInput spdxInputs = 3;
+
+    // spdxwriter: directory path to write one or more output SPDX files
+    string spdxOutputDir = 4;
+}
+
+// StartReq requests that a Job be started on this Agent. An Agent should
+// respond to this (eventually) by sending a StatusReport.
+message StartReq {
+    // configuration for this job
+    JobConfig config = 1;
+}
+
+// StatusReq requests that the Agent send a status update message
+// about the Job for this connection.
+message StatusReq {}
+
+// CancelReq requests that the Agent cancel the Job for this connection.
+// An Agent should respond to this (eventually) by sending a StatusReport.
+message CancelReq {}
+
+
+// ===== Reports (from Agent to Controller) =====
+
+// DescribeReport provides information about the Agent instance over its
+// lifetime (and not information specific to this Job).
+message DescribeReport {
+    // the name of this agent, e.g. its unique name within the peridot group
+    string name = 1;
+
+    // the type of this agent, which does not need to be unique within the
+    // peridot group
+    string type = 2;
+
+    // this agent's configuration on startup, returned as a YAML string.
+    // this is not the particular Job's configuration.
+    string agentConfig = 3;
+
+    // this agent's capabilities
+    repeated string capabilities = 4;
+}
+
+enum JobRunStatus {
+    // invalid (zero) response
+    STATUS_INVALID = 0;
+    // job is still starting up
+    STARTUP = 1;
+    // job is in progress
+    RUNNING = 2;
+    // job is no longer running. may have encountered problems and/or
+    // been cancelled.
+    STOPPED = 3;    
+}
+
+enum JobHealthStatus {
+    // invalid (zero) response
+    HEALTH_INVALID = 0;
+    // job is currently running with no problems encountered
+    OK = 1;
+    // job has encountered problems resulting in degraded performance
+    // or quality, but is still running and expected to continue
+    DEGRADED = 2;
+    // job has encountered unrecoverable problems and should be
+    // treated as failed; will not progress further
+    ERROR = 3;
+}
+
+enum JobCancelStatus {
+    // invalid (zero) response
+    CANCEL_INVALID = 0;
+    // job has not been asked to be cancelled
+    NOCANCEL = 1;
+    // job was requested to be cancelled by user, but this agent
+    // refused to cancel; details in outputMessages or errorMessages
+    WONTCANCEL = 2;
+    // job was requested to be cancelled by user, and is in process
+    // of stopping
+    CANCELLING = 3;
+    // job was cancelled by user and has finished stopping
+    CANCELLED = 4;
+}
+
+// StatusReport provides information about the Job for this connection.
+// It should be issued promptly following receipt of a StartReq, StatusReq
+// or CancelReq, and may be issued periodically otherwise at the Agent's
+// discretion.
+message StatusReport {
+    // is the job running?
+    JobRunStatus runStatus = 1;
+
+    // is the job healthy?
+    JobHealthStatus healthStatus = 2;
+
+    // was the job requested to be cancelled? 
+    JobCancelStatus cancelStatus = 3;
+
+    // time when the job was started, as Unix time
+    int64 timeStarted = 4;
+
+    // time when the job stopped running, as Unix time
+    int64 timeFinished = 5;
+
+    // logged output, if any. should be short messages; anything
+    // lengthy should be separately logged or reported elsewhere
+    string outputMessages = 6;
+
+    // logged errors, if any
+    string errorMessages = 7;
+}
