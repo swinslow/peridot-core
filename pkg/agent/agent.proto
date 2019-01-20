@@ -117,8 +117,8 @@ message DescribeReport {
 }
 
 enum JobRunStatus {
-    // invalid (zero) response
-    STATUS_INVALID = 0;
+    // zero value: no change communicated
+    STATUS_SAME = 0;
     // job is still starting up
     STARTUP = 1;
     // job is in progress
@@ -129,8 +129,8 @@ enum JobRunStatus {
 }
 
 enum JobHealthStatus {
-    // invalid (zero) response
-    HEALTH_INVALID = 0;
+    // zero value: no change communicated
+    HEALTH_SAME = 0;
     // job is currently running with no problems encountered
     OK = 1;
     // job has encountered problems resulting in degraded performance
@@ -142,8 +142,8 @@ enum JobHealthStatus {
 }
 
 enum JobCancelStatus {
-    // invalid (zero) response
-    CANCEL_INVALID = 0;
+    // zero value: no change communicated
+    CANCEL_SAME = 0;
     // job has not been asked to be cancelled
     NOCANCEL = 1;
     // job was requested to be cancelled by user, but this agent
