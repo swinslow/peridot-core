@@ -21,7 +21,6 @@ message ControllerMsg {
         DescribeReq describe = 1;
         StartReq start = 2;
         StatusReq status = 3;
-        CancelReq cancel = 4;
     }
 }
 
@@ -91,11 +90,6 @@ message StartReq {
 // about the Job for this connection.
 message StatusReq {}
 
-// CancelReq requests that the Agent cancel the Job for this connection.
-// An Agent should respond to this (eventually) by sending a StatusReport.
-message CancelReq {}
-
-
 // ===== Reports (from Agent to Controller) =====
 
 // DescribeReport provides information about the Agent instance over its
@@ -141,21 +135,6 @@ enum JobHealthStatus {
     ERROR = 3;
 }
 
-enum JobCancelStatus {
-    // zero value: no change communicated
-    CANCEL_SAME = 0;
-    // job has not been asked to be cancelled
-    NOCANCEL = 1;
-    // job was requested to be cancelled by user, but this agent
-    // refused to cancel; details in outputMessages or errorMessages
-    WONTCANCEL = 2;
-    // job was requested to be cancelled by user, and is in process
-    // of stopping
-    CANCELLING = 3;
-    // job was cancelled by user and has finished stopping
-    CANCELLED = 4;
-}
-
 // StatusReport provides information about the Job for this connection.
 // It should be issued promptly following receipt of a StartReq, StatusReq
 // or CancelReq, and may be issued periodically otherwise at the Agent's
@@ -167,19 +146,16 @@ message StatusReport {
     // is the job healthy?
     JobHealthStatus healthStatus = 2;
 
-    // was the job requested to be cancelled? 
-    JobCancelStatus cancelStatus = 3;
-
     // time when the job was started, as Unix time
-    int64 timeStarted = 4;
+    int64 timeStarted = 3;
 
     // time when the job stopped running, as Unix time
-    int64 timeFinished = 5;
+    int64 timeFinished = 4;
 
     // logged output, if any. should be short messages; anything
     // lengthy should be separately logged or reported elsewhere
-    string outputMessages = 6;
+    string outputMessages = 5;
 
     // logged errors, if any
-    string errorMessages = 7;
+    string errorMessages = 6;
 }
