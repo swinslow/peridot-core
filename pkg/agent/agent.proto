@@ -77,6 +77,13 @@ message JobConfig {
 
     // spdxwriter: directory path to write one or more output SPDX files
     string spdxOutputDir = 4;
+
+    // job-specific key-value pairs; will vary by agent
+    message JobKV {
+        string key = 1;
+        string value = 2;
+    }
+    repeated JobKV jkvs = 5;
 }
 
 // StartReq requests that a Job be started on this Agent. An Agent should
@@ -108,6 +115,13 @@ message DescribeReport {
 
     // this agent's capabilities
     repeated string capabilities = 4;
+
+    // the config keys that this agent recognizes, and their meanings
+    message KVMeaning {
+        string key = 1;
+        string meaning = 2;
+    }
+    repeated KVMeaning knownkvs = 5;
 }
 
 enum JobRunStatus {
