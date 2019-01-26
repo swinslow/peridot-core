@@ -1,0 +1,437 @@
+// SPDX-License-Identifier: Apache-2.0 OR GPL-2.0-or-later
+syntax = "proto3";
+
+package controller;
+
+import "pkg/agent/agent.proto";
+
+// Controller defines the main GRPC interface provided by the
+// peridot controller to external callers, such as peridotctl.
+service Controller {
+
+    // ===== Agents =====
+
+    // AddAgent configures the controller to know about a new
+    // Agent that is available for new Jobs and JobSets. It will
+    // return a failure message if an Agent already exists with
+    // the given Name.
+    rpc AddAgent(AddAgentReq) returns (AddAgentResp) {}
+
+    // GetAgent requests information about the Agent with the
+    // given name and type.
+    rpc GetAgent(GetAgentReq) returns (GetAgentResp) {}
+
+    // GetAllAgents requests information about all registered Agents.
+    rpc GetAllAgents(GetAllAgentsReq) returns (GetAllAgentsResp) {}
+
+    // RemoveAgent configures the controller to remove the Agent
+    // with the specified name. It will return a failure message if
+    // any Jobs or JobSets are currently scheduled for that Agent.
+    rpc RemoveAgent(RemoveAgentReq) returns (RemoveAgentResp) {}
+
+    // ===== JobSetTemplates =====
+
+    // AddJobSetTemplate configures the controller to know about a new
+    // JobSetTemplate that is available for new JobSets. It will
+    // return a failure message if an JobSetTemplate already exists with
+    // the given Name.
+    rpc AddJobSetTemplate(AddJobSetTemplateReq) returns (AddJobSetTemplateResp) {}
+
+    // GetJobSetTemplate requests information about the JobSetTemplate with the
+    // given name and type.
+    rpc GetJobSetTemplate(GetJobSetTemplateReq) returns (GetJobSetTemplateResp) {}
+
+    // GetAllJobSetTemplates requests information about all registered JobSetTemplates.
+    rpc GetAllJobSetTemplates(GetAllJobSetTemplatesReq) returns (GetAllJobSetTemplatesResp) {}
+
+    // RemoveJobSetTemplate configures the controller to remove the JobSetTemplate
+    // with the specified name. It will return a failure message if
+    // any JobSets are currently scheduled for that JobSetTemplate.
+    rpc RemoveJobSetTemplate(RemoveJobSetTemplateReq) returns (RemoveJobSetTemplateResp) {}
+
+    // ===== Jobs =====
+
+    // StartJob requests that the Controller begin a new single Job, with the
+    // specified configuration.
+    rpc StartJob(StartJobReq) returns (StartJobResp) {}
+
+    // GetJob requests information on the specified Job.
+    rpc GetJob(GetJobReq) returns (GetJobResp) {}
+
+    // GetAllJobs requests information on all known Jobs.
+    rpc GetAllJobs(GetAllJobsReq) returns (GetAllJobsResp) {}
+
+    // CancelJob requests that the Controller cancel the specified Job.
+    rpc CancelJob(CancelJobReq) returns (CancelJobResp) {}
+
+    // ===== JobSet =====
+
+    // StartJobSet requests that the Controller begin a new JobSet, with the
+    // specified configuration.
+    rpc StartJobSet(StartJobSetReq) returns (StartJobSetResp) {}
+
+    // GetJobSet requests information on the specified JobSet.
+    rpc GetJobSet(GetJobSetReq) returns (GetJobSetResp) {}
+
+    // GetAllJobSets requests information on all known JobSets.
+    rpc GetAllJobSets(GetAllJobSetsReq) returns (GetAllJobSetsResp) {}
+
+    // CancelJobSet requests that the Controller cancel the specified JobSet.
+    rpc CancelJobSet(CancelJobSetReq) returns (CancelJobSetResp) {}
+
+}
+
+// ===== Agents =====
+
+// AgentConfig defines an Agent instance's configuration.
+message AgentConfig {
+    // name for this agent instance. must be unique across the controller.
+    string name = 1;
+
+    // url where this agent can be found
+    string url = 2;
+
+    // port on the url where this agent can be found
+    uint32 port = 3;
+
+    // agent type; need not be unique across instances (e.g., can have multiple
+    // idsearcher instances with 'idsearcher' type and different configs, as
+    // long as they have different names).
+    string type = 4;
+
+    // agent-specific key-value pairs
+    message AgentConfig {
+        string key = 1;
+        string value = 2;
+    }
+    repeated AgentConfig configs = 5;
+}
+
+// AddAgentReq requests that a new Agent be registered with the controller.
+message AddAgentReq {
+    AgentConfig cfg = 1;
+}
+
+// AddAgentResp tells whether the agent could be configured.
+message AddAgentResp {
+    // was the agent successfully configured?
+    bool success = 1;
+
+    // any output messages
+    string outputMsg = 2;
+
+    // any error messages; should only be set if success == false
+    string errorMsg = 3;
+}
+
+// GetAgentReq requests info on the Agent with the given name.
+message GetAgentReq {
+    string name = 1;
+}
+
+// GetAgentResp returns info on the requested agent.
+// If name was not found, success will be set to false and error message returned.
+message GetAgentResp {
+    // was an agent found with the given name?
+    bool success = 1;
+
+    // if success, agent configuration is returned
+    AgentConfig cfg = 2;
+
+    // if not success, error is returned
+    string errorMsg = 3;
+}
+
+// GetAllAgentsReq requests info on all registered Agents.
+message GetAllAgentsReq {}
+
+// GetAllAgentsResp returns info on all registered Agents.
+message GetAllAgentsResp {
+    repeated AgentConfig cfgs = 1;
+}
+
+// RemoveAgentReq requests that the Agent be removed.
+message RemoveAgentReq {
+    string name = 1;
+}
+
+// RemoveAgentResp tells whether the agent could be removed.
+message RemoveAgentResp {
+    // was the agent successfully removed?
+    bool success = 1;
+
+    // any output messages
+    string outputMsg = 2;
+
+    // any error messages; should only be set if success == false
+    string errorMsg = 3;
+}
+
+// ===== JobSetTemplates =====
+
+// StepAgent is a JobSetTemplate step for a single Agent.
+message StepAgent {
+    // the agent's name
+    string name = 1;
+}
+
+// StepJobSet is a JobSetTemplate step for a separate JobSet.
+message StepJobSet {
+    // the JobSetTemplate's name
+    string name = 1;
+}
+
+// StepConcurrent represents a collection of steps that can run concurrently.
+message StepConcurrent {
+    // the set of concurrent steps
+    repeated Step steps = 1;
+}
+
+// Step represents the union of step types.
+message Step {
+    oneof s {
+        StepAgent agent = 1;
+        StepJobSet jobset = 2;
+        StepConcurrent concurrent = 3;
+    }
+}
+
+// JobSetTemplate defines a template for new JobSets.
+message JobSetTemplate {
+    // unique name for the template
+    string name = 1;
+
+    // this JobSet's steps
+    repeated Step steps = 2;
+}
+
+// AddJobSetTemplateReq requests that a new JobSetTemplate be registered with
+// the controller.
+message AddJobSetTemplateReq {
+    JobSetTemplate jst = 1;
+}
+
+// AddJobSetTemplateResp tells whether the template was successfully
+// registered.
+message AddJobSetTemplateResp {
+    // was the template successfully configured?
+    bool success = 1;
+
+    // any output messages
+    string outputMsg = 2;
+
+    // any error messages; should only be set if success == false
+    string errorMsg = 3;
+}
+
+// GetJobSetTemplateReq requests info on the JobSetTemplate with the given name.
+message GetJobSetTemplateReq {
+    string name = 1;
+}
+
+// GetJobSetTemplateResp returns info on the requested JobSetTemplate.
+// If name was not found, success will be set to false and error message returned.
+message GetJobSetTemplateResp {
+    // was a JobSetTemplate found with the given name?
+    bool success = 1;
+
+    // if success, JobSetTemplate is returned
+    JobSetTemplate jst = 2;
+
+    // if not success, error is returned
+    string errorMsg = 3;
+}
+
+// GetAllJobSetTemplatesReq requests info on all registered JobSetTemplates.
+message GetAllJobSetTemplatesReq {}
+
+// GetAllJobSetTemplatesResp returns info on all registered JobSetTemplates.
+message GetAllJobSetTemplatesResp {
+    repeated JobSetTemplate jsts = 1;
+}
+
+// RemoveJobSetTemplateReq requests that the JobSetTemplate be removed.
+message RemoveJobSetTemplateReq {
+    string name = 1;
+}
+
+// RemoveJobSetTemplateResp tells whether the JobSetTemplate could be removed.
+message RemoveJobSetTemplateResp {
+    // was the JobSetTemplate successfully removed?
+    bool success = 1;
+
+    // any output messages
+    string outputMsg = 2;
+
+    // any error messages; should only be set if success == false
+    string errorMsg = 3;
+}
+
+// ===== Jobs =====
+
+// StartJobReq requests that a single new Job be started.
+message StartJobReq {
+    // name of the agent to run
+    string agentName = 1;
+
+    // configuration for this job
+    agent.JobConfig cfg = 2;
+}
+
+// StartJobResp tells whether the Job was started successfully.
+message StartJobResp {
+    // was the job successfully started?
+    bool success = 1;
+
+    // new Job ID
+    uint64 jobID = 2;
+
+    // any output messages
+    string outputMsg = 3;
+
+    // any error messages; should only be set if success == false
+    string errorMsg = 4;
+}
+
+// GetJobReq requests information on the specified Job's status.
+message GetJobReq {
+    uint64 jobID = 1;
+}
+
+// GetJobResp returns information on the specified Job's status.
+message GetJobResp {
+    // Job ID
+    uint64 jobID = 1;
+
+    // configuration for this job
+    agent.JobConfig cfg = 2;
+
+    // status of this job
+    agent.StatusReport st = 3;
+}
+
+// GetAllJobsReq requests information on all known Jobs.
+message GetAllJobsReq {}
+
+// GetAllJobsResp returns information on all known Jobs.
+message GetAllJobsResp {
+    repeated GetJobResp jobs = 1;
+}
+
+// CancelJobReq requests that the specified Job be cancelled.
+message CancelJobReq {
+    uint64 jobID = 1;
+}
+
+// CancelJobResp tells whether the Job was cancelled successfully.
+message CancelJobResp {
+    // was the job successfully cancelled?
+    bool success = 1;
+
+    // any output messages
+    string outputMsg = 2;
+
+    // any error messages; should only be set if success == false
+    string errorMsg = 3;
+}
+
+// ===== JobSet =====
+
+// JobSet-specific key-value pairs; will be passed along to all Agents
+message JobSetConfig {
+    string key = 1;
+    string value = 2;
+}
+
+// StartJobSetReq requests that a single new JobSet be started.
+message StartJobSetReq {
+    // name of the JobSet to run
+    string jstName = 1;
+
+    // configuration for this JobSet
+    repeated JobSetConfig cfgs = 2;
+}
+
+// StartJobSetResp tells whether the JobSet was started successfully.
+message StartJobSetResp {
+    // was the JobSet successfully started?
+    bool success = 1;
+
+    // new JobSet ID
+    uint64 jobSetID = 2;
+
+    // any output messages
+    string outputMsg = 3;
+
+    // any error messages; should only be set if success == false
+    string errorMsg = 4;
+}
+
+// GetJobSetReq requests information on the specified JobSet's status.
+message GetJobSetReq {
+    uint64 jobSetID = 1;
+}
+
+enum JobSetStatus {
+    // zero value: no change communicated
+    STATUS_SAME = 0;
+    // JobSet is still starting up / pending
+    STARTUP = 1;
+    // JobSet is in progress
+    RUNNING = 2;
+    // JobSet is no longer running. may have encountered problems and/or
+    // been cancelled.
+    STOPPED = 3;
+}
+
+message JobSetStatusReport {
+    // is the JobSet running?
+    JobSetStatus runStatus = 1;
+
+    // time when the JobSet was started, as Unix time
+    int64 timeStarted = 2;
+
+    // time when the JobSet stopped running, as Unix time
+    int64 timeFinished = 3;
+
+    // logged output, if any. should be short messages; anything
+    // lengthy should be separately logged or reported elsewhere
+    string outputMessages = 4;
+
+    // logged errors, if any
+    string errorMessages = 5;
+}
+
+// GetJobSetResp returns information on the specified JobSet's status.
+message GetJobSetResp {
+    // JobSet ID
+    uint64 jobSetID = 1;
+
+    // status of this JobSet
+    JobSetStatusReport st = 2;
+}
+
+// GetAllJobSetsReq requests information on all known JobSets.
+message GetAllJobSetsReq {}
+
+// GetAllJobSetsResp returns information on all known JobSets.
+message GetAllJobSetsResp {
+    repeated GetJobSetResp sts = 1;
+}
+
+// CancelJobSetReq requests that the specified JobSet be cancelled.
+message CancelJobSetReq {
+    uint64 jobSetID = 1;
+}
+
+// CancelJobSetResp tells whether the JobSet was cancelled successfully.
+message CancelJobSetResp {
+    // was the JobSet successfully cancelled?
+    bool success = 1;
+
+    // any output messages
+    string outputMsg = 2;
+
+    // any error messages; should only be set if success == false
+    string errorMsg = 3;
+}
