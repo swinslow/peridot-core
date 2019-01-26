@@ -50,7 +50,10 @@ func main() {
 				exiting = true
 				break
 			}
-			log.Printf("record notice: %#v\n", jr)
+			log.Printf("record notice: %s\n", jr.String())
+			if jr.Status.RunStatus == agent.JobRunStatus_STOPPED {
+				exiting = true
+			}
 		case err := <-errc:
 			log.Printf("ERROR received: %v\n", err)
 		}

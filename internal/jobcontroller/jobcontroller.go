@@ -102,7 +102,7 @@ func JobController(ctx context.Context, cfg Config) (chan<- JobRequest, <-chan J
 }
 
 func startNewJob(ctx context.Context, js *jobsData, jr JobRequest, n *sync.WaitGroup, rc chan<- JobUpdate) uint64 {
-	log.Printf("===> In startNewJob: jr = %#v\n", jr)
+	log.Printf("===> In startNewJob: jr = %s\n", jr.String())
 	// create a new JobRecord and fill it in
 	rec := &JobRecord{
 		JobID:     js.nextJobID,

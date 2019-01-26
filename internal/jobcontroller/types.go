@@ -3,6 +3,8 @@
 package jobcontroller
 
 import (
+	"fmt"
+
 	"github.com/swinslow/peridot-core/pkg/agent"
 )
 
@@ -11,6 +13,15 @@ type Config struct {
 	// Agents defines all Agents that the JobController knows about.
 	// It maps the unique Agent instance's name to its AgentRef.
 	Agents map[string]AgentRef
+}
+
+// String provides a compact string representation of the Config.
+func (cfg *Config) String() string {
+	agentsStr := ""
+	for _, ar := range cfg.Agents {
+		agentsStr += fmt.Sprintf("%s => %s; ", ar.Name, ar.Address)
+	}
+	return fmt.Sprintf("Config{Agents: %s}", agentsStr)
 }
 
 // AgentRef defines information about an Agent: its name and where
@@ -35,6 +46,11 @@ type JobRequest struct {
 	Cfg agent.JobConfig
 }
 
+// String provides a compact string representation of the JobRequest.
+func (jreq *JobRequest) String() string {
+	return fmt.Sprintf("JobRequest{AgentName: %s, Cfg: %s}", jreq.AgentName, jreq.Cfg.String())
+}
+
 // JobRecord defines the full collection of metadata about a Job:
 // its Agent, its configuration and its current status.
 type JobRecord struct {
@@ -55,6 +71,11 @@ type JobRecord struct {
 	// Err defines any error messages that have arisen on the controller
 	// for this Job. (Agent errors will be found in Status.ErrorMessages.)
 	Err error
+}
+
+// String provides a compact string representation of the JobRecord.
+func (jrec *JobRecord) String() string {
+	return fmt.Sprintf("JobRecord{JobID: %d, AgentName: %s, Cfg: %s, Status: %s, Err: %v}", jrec.JobID, jrec.AgentName, jrec.Cfg.String(), jrec.Status.String(), jrec.Err)
 }
 
 // JobUpdate defines the messages that a runJob goroutine sends to the

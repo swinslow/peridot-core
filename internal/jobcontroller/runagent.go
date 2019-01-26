@@ -74,7 +74,7 @@ func runJobAgent(ctx context.Context, jobID uint64, ar AgentRef, cfg agent.JobCo
 				return
 			}
 			if err != nil {
-				log.Printf("== controller CLOSING got error")
+				log.Printf("== controller CLOSING got error: %v", err)
 				rc <- getErrorUpdate(jobID, fmt.Errorf("error for %s (%s): %v", ar.Name, ar.Address, err))
 				close(waitc)
 				return
@@ -84,10 +84,18 @@ func runJobAgent(ctx context.Context, jobID uint64, ar AgentRef, cfg agent.JobCo
 			switch x := in.Am.(type) {
 			case *agent.AgentMsg_Status:
 				st := *x.Status
-				log.Printf("== controller RECV StatusReport for jobID %d: %#v\n", jobID, st)
+				log.Printf("== controller RECV StatusReport for jobID %d: %s\n", jobID, st.String())
 				rc <- JobUpdate{
 					JobID:  jobID,
 					Status: st,
+				}
+
+				// if this was a STOPPED message, the job is done
+				// and we need to close the stream to start exiting
+				if st.RunStatus == agent.JobRunStatus_STOPPED {
+					log.Printf("== controller CLOSING got Job STOPPED")
+					close(waitc)
+					return
 				}
 			}
 		}
