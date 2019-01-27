@@ -3,6 +3,8 @@ syntax = "proto3";
 
 package agent;
 
+option go_package = "github.com/swinslow/peridot-core/pkg/agent";
+
 // Agent defines the GRPC interface provided by an Agent that can talk
 // to a peridot controller.
 service Agent {

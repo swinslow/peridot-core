@@ -3,6 +3,8 @@ syntax = "proto3";
 
 package controller;
 
+option go_package = "github.com/swinslow/peridot-core/pkg/controller";
+
 import "pkg/agent/agent.proto";
 
 // Controller defines the main GRPC interface provided by the
