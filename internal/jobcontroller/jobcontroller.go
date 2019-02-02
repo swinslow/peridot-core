@@ -28,12 +28,16 @@ type jobsData struct {
 // three channels (described from the caller's perspective):
 // * inJobStream, a write-only channel to submit new JobRequests, which must
 //   be closed by the caller
+// * inJobUpdateStream, a write-only channel to submit a request for an
+//   update of one Job's status given its jobID, or 0 for all Jobs
 // * jobRecordStream, a read-only channel with jobRecord updates
 // * errc, a read-only channel where an error will be written or else
 //   nil if no errors in the controller itself are encountered.
-func JobController(ctx context.Context, cfg Config) (chan<- JobRequest, <-chan JobRecord, <-chan error) {
+func JobController(ctx context.Context, cfg Config) (chan<- JobRequest, chan<- uint64, <-chan JobRecord, <-chan error) {
 	// the caller will own the inJobStream channel and must close it
 	inJobStream := make(chan JobRequest)
+	// the caller will also own the inJobUpdateStream channel and must close it
+	inJobUpdateStream := make(chan uint64)
 	// we own the jobRecordStream channel
 	jobRecordStream := make(chan JobRecord)
 	// we own the errc channel. make it buffered so we can write 1 error
@@ -90,15 +94,19 @@ func JobController(ctx context.Context, cfg Config) (chan<- JobRequest, <-chan J
 			case ju := <-rc:
 				// an agent has sent a JobUpdate
 				updateJobRecord(&js, ju.JobID, &ju, jobRecordStream)
+			case jobID := <-inJobUpdateStream:
+				// the caller has submitted a request for a JobRecord update
+				// we can get it by sending nil to updateJobRecord
+				updateJobRecord(&js, jobID, nil, jobRecordStream)
 			}
 		}
 
-		// FIXME as we are exiting, first we need to drain any remaining
-		// FIXME updates from rc, and then we need to report out all JobRecords
+		// FIXME as we are exiting, do we first need to drain any remaining
+		// FIXME updates from rc, and then report out all JobRecords?
 	}()
 
 	// finally we return the channels so that the caller can kick things off
-	return inJobStream, jobRecordStream, errc
+	return inJobStream, inJobUpdateStream, jobRecordStream, errc
 }
 
 func startNewJob(ctx context.Context, js *jobsData, jr JobRequest, n *sync.WaitGroup, rc chan<- JobUpdate) uint64 {
@@ -136,7 +144,6 @@ func startNewJob(ctx context.Context, js *jobsData, jr JobRequest, n *sync.WaitG
 }
 
 func updateJobRecord(js *jobsData, jobID uint64, ju *JobUpdate, jobRecordStream chan<- JobRecord) {
-
 	// if ju is nil, we're just sending the original record upon job creation
 	if ju != nil {
 		// if ju is non-nil, we need to update the record first
@@ -152,5 +159,13 @@ func updateJobRecord(js *jobsData, jobID uint64, ju *JobUpdate, jobRecordStream 
 	}
 
 	// now we broadcast the updated (or not) record
-	jobRecordStream <- *js.jobs[jobID]
+	// make sure the job with this jobID exists (if ju was nil, we
+	// didn't check earlier)
+	jr, ok := js.jobs[jobID]
+	if !ok {
+		// if the job ID doesn't exist, we can't do anything with this message
+		// but we also don't want to send it out on the stream; just exit
+		return
+	}
+	jobRecordStream <- *jr
 }

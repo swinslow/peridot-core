@@ -11,12 +11,25 @@ import "pkg/agent/agent.proto";
 // peridot controller to external callers, such as peridotctl.
 service Controller {
 
+    // ===== Controller startup and status =====
+
+    // Start the Controller. Should only be called after all agents have
+    // been added via AddAgent.
+    rpc Start(StartReq) returns (StartResp) {}
+
+    // Get Controller overall status.
+    rpc GetStatus(GetStatusReq) returns (GetStatusResp) {}
+
+    // Shut down the Controller and all agents.
+    rpc Stop(StopReq) returns (StopResp) {}
+
     // ===== Agents =====
 
     // AddAgent configures the controller to know about a new
     // Agent that is available for new Jobs and JobSets. It will
-    // return a failure message if an Agent already exists with
-    // the given Name.
+    // return a failure message if called after the Controller has
+    // started (e.g., after Start has been called) or if an Agent
+    // already exists with the given Name.
     rpc AddAgent(AddAgentReq) returns (AddAgentResp) {}
 
     // GetAgent requests information about the Agent with the
@@ -25,11 +38,6 @@ service Controller {
 
     // GetAllAgents requests information about all registered Agents.
     rpc GetAllAgents(GetAllAgentsReq) returns (GetAllAgentsResp) {}
-
-    // RemoveAgent configures the controller to remove the Agent
-    // with the specified name. It will return a failure message if
-    // any Jobs or JobSets are currently scheduled for that Agent.
-    rpc RemoveAgent(RemoveAgentReq) returns (RemoveAgentResp) {}
 
     // ===== JobSetTemplates =====
 
@@ -53,12 +61,15 @@ service Controller {
 
     // ===== Jobs =====
 
-    // StartJob requests that the Controller begin a new single Job, with the
-    // specified configuration.
-    rpc StartJob(StartJobReq) returns (StartJobResp) {}
+    // Jobs cannot be started individually. Only a JobSet can be started from the
+    // GRPC interface.
 
     // GetJob requests information on the specified Job.
     rpc GetJob(GetJobReq) returns (GetJobResp) {}
+
+    // GetAllJobsForJobSet requests information on all known Jobs for the given
+    // JobSet.
+    rpc GetAllJobsForJobSet(GetAllJobsForJobSetReq) returns (GetAllJobsForJobSetResp) {}
 
     // GetAllJobs requests information on all known Jobs.
     rpc GetAllJobs(GetAllJobsReq) returns (GetAllJobsResp) {}
@@ -81,6 +92,48 @@ service Controller {
     // CancelJobSet requests that the Controller cancel the specified JobSet.
     rpc CancelJobSet(CancelJobSetReq) returns (CancelJobSetResp) {}
 
+}
+
+// ===== Controller startup and status =====
+
+// StartReq requests that the Controller start running.
+message StartReq {}
+
+// StartResp tells whether the Controller could try to start.
+message StartResp {
+    bool starting = 1;
+}
+
+// GetStatusReq requests the current status of the Controller.
+message GetStatusReq {}
+
+// GetStatusResp tells the Controller's overall current status.
+message GetStatusResp {
+    // has the Controller been asked to start? (e.g., has StartReq been called?)
+    bool wasStartReq = 1;
+
+    // has the Controller been asked to stop? (e.g., has StartReq been called?)
+    bool wasStopReq = 2;
+
+    // is the Controller still running?
+    bool isRunning = 3;
+
+    // has the Controller encountered any errors? (could still be running)
+    bool isError = 4;
+
+    // any output messages
+    string outputMsg = 5;
+
+    // any error messages; should only be set if isError == true
+    string errorMsg = 6;
+}
+
+// StopReq requests that the Controller stop running.
+message StopReq {}
+
+// StopResp tells whether the Controller could try to stop.
+message StopResp {
+    bool stopping = 1;
 }
 
 // ===== Agents =====
@@ -150,23 +203,6 @@ message GetAllAgentsReq {}
 // GetAllAgentsResp returns info on all registered Agents.
 message GetAllAgentsResp {
     repeated AgentConfig cfgs = 1;
-}
-
-// RemoveAgentReq requests that the Agent be removed.
-message RemoveAgentReq {
-    string name = 1;
-}
-
-// RemoveAgentResp tells whether the agent could be removed.
-message RemoveAgentResp {
-    // was the agent successfully removed?
-    bool success = 1;
-
-    // any output messages
-    string outputMsg = 2;
-
-    // any error messages; should only be set if success == false
-    string errorMsg = 3;
 }
 
 // ===== JobSetTemplates =====
@@ -271,30 +307,6 @@ message RemoveJobSetTemplateResp {
 
 // ===== Jobs =====
 
-// StartJobReq requests that a single new Job be started.
-message StartJobReq {
-    // name of the agent to run
-    string agentName = 1;
-
-    // configuration for this job
-    agent.JobConfig cfg = 2;
-}
-
-// StartJobResp tells whether the Job was started successfully.
-message StartJobResp {
-    // was the job successfully started?
-    bool success = 1;
-
-    // new Job ID
-    uint64 jobID = 2;
-
-    // any output messages
-    string outputMsg = 3;
-
-    // any error messages; should only be set if success == false
-    string errorMsg = 4;
-}
-
 // GetJobReq requests information on the specified Job's status.
 message GetJobReq {
     uint64 jobID = 1;
@@ -305,11 +317,29 @@ message GetJobResp {
     // Job ID
     uint64 jobID = 1;
 
+    // ID of JobSet that this job is part of, if any
+    uint64 jobSetID = 2;
+
+    // Step # within JobSet that this job is part of, if any
+    uint64 jobSetStepID = 3;
+
     // configuration for this job
-    agent.JobConfig cfg = 2;
+    agent.JobConfig cfg = 4;
 
     // status of this job
-    agent.StatusReport st = 3;
+    agent.StatusReport st = 5;
+}
+
+// GetAllJobsForJobSetReq requests information on all known Jobs in the
+// JobSet with the given ID.
+message GetAllJobsForJobSetReq {
+    uint64 jobSetID = 1;
+}
+
+// GetAllJobsForJobSetResp returns information on all known Jobs in the
+// JobSet with the given ID.
+message GetAllJobsForJobSetResp {
+    repeated GetJobResp jobs = 1;
 }
 
 // GetAllJobsReq requests information on all known Jobs.
@@ -347,7 +377,7 @@ message JobSetConfig {
 
 // StartJobSetReq requests that a single new JobSet be started.
 message StartJobSetReq {
-    // name of the JobSet to run
+    // name of the JobSetTemplate to run as a new JobSet
     string jstName = 1;
 
     // configuration for this JobSet
@@ -362,11 +392,14 @@ message StartJobSetResp {
     // new JobSet ID
     uint64 jobSetID = 2;
 
+    // all the jobs (with their IDs and step IDs) in this JobSet
+    repeated GetJobResp jobs = 3;
+
     // any output messages
-    string outputMsg = 3;
+    string outputMsg = 4;
 
     // any error messages; should only be set if success == false
-    string errorMsg = 4;
+    string errorMsg = 5;
 }
 
 // GetJobSetReq requests information on the specified JobSet's status.

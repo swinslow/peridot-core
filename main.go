@@ -98,11 +98,15 @@ func main() {
 	defer cancel()
 
 	// start JobController and get channels
-	inJobStream, jobRecordStream, errc := jobcontroller.JobController(ctx, cfg)
+	inJobStream, inJobUpdateStream, jobRecordStream, errc := jobcontroller.JobController(ctx, cfg)
 
 	// run the retriever
 	runRetrieve(inJobStream, jobRecordStream, errc)
 
 	// run the IDsearcher
 	runIdsearch(inJobStream, jobRecordStream, errc)
+
+	// we need to close the channels that we own
+	close(inJobStream)
+	close(inJobUpdateStream)
 }
