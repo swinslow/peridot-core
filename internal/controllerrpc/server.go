@@ -1,12 +1,16 @@
+// Package controllerrpc is the gRPC server and endpoints that act
+// as an interface between external callers and the main peridot controller.
+// It relies on calling the functions exported by the Controller in its
+// rpcaccess file.
 // SPDX-License-Identifier: Apache-2.0 OR GPL-2.0-or-later
-
-package jobcontroller
+package controllerrpc
 
 import (
 	"log"
 	"net"
 
-	"github.com/swinslow/peridot-core/pkg/controller"
+	"github.com/swinslow/peridot-core/internal/controller"
+	pbc "github.com/swinslow/peridot-core/pkg/controller"
 	"google.golang.org/grpc"
 )
 
@@ -14,14 +18,11 @@ const (
 	port = ":8900"
 )
 
-type jcServer struct {
-	inJobStream       chan<- JobRequest
-	inJobUpdateStream chan<- uint64
-	jobRecordStream   <-chan JobRecord
-	errc              <-chan error
+type cServer struct {
+	c *controller.Controller
 }
 
-func runGRPCServer(jcs *jcServer) {
+func runGRPCServer(cs *cServer) {
 	// open a socket for listening
 	lis, err := net.Listen("tcp", port)
 	if err != nil {
@@ -30,7 +31,7 @@ func runGRPCServer(jcs *jcServer) {
 
 	// create and register new GRPC server for controller
 	server := grpc.NewServer()
-	controller.RegisterControllerServer(server, jcs)
+	pbc.RegisterControllerServer(server, cs)
 
 	// start grpc server
 	if err := server.Serve(lis); err != nil {

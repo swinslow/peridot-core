@@ -32,8 +32,8 @@ service Controller {
     // already exists with the given Name.
     rpc AddAgent(AddAgentReq) returns (AddAgentResp) {}
 
-    // GetAgent requests information about the Agent with the
-    // given name and type.
+    // GetAgent requests configuration information about the Agent with
+    // the given name.
     rpc GetAgent(GetAgentReq) returns (GetAgentResp) {}
 
     // GetAllAgents requests information about all registered Agents.
@@ -155,11 +155,11 @@ message AgentConfig {
     string type = 4;
 
     // agent-specific key-value pairs
-    message AgentConfig {
+    message AgentKV {
         string key = 1;
         string value = 2;
     }
-    repeated AgentConfig configs = 5;
+    repeated AgentKV kvs = 5;
 }
 
 // AddAgentReq requests that a new Agent be registered with the controller.
@@ -172,11 +172,8 @@ message AddAgentResp {
     // was the agent successfully configured?
     bool success = 1;
 
-    // any output messages
-    string outputMsg = 2;
-
     // any error messages; should only be set if success == false
-    string errorMsg = 3;
+    string errorMsg = 2;
 }
 
 // GetAgentReq requests info on the Agent with the given name.
