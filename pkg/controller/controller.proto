@@ -5,6 +5,7 @@ package controller;
 
 option go_package = "github.com/swinslow/peridot-core/pkg/controller";
 
+import "pkg/status/status.proto";
 import "pkg/agent/agent.proto";
 
 // Controller defines the main GRPC interface provided by the
@@ -53,11 +54,6 @@ service Controller {
 
     // GetAllJobSetTemplates requests information about all registered JobSetTemplates.
     rpc GetAllJobSetTemplates(GetAllJobSetTemplatesReq) returns (GetAllJobSetTemplatesResp) {}
-
-    // RemoveJobSetTemplate configures the controller to remove the JobSetTemplate
-    // with the specified name. It will return a failure message if
-    // any JobSets are currently scheduled for that JobSetTemplate.
-    rpc RemoveJobSetTemplate(RemoveJobSetTemplateReq) returns (RemoveJobSetTemplateResp) {}
 
     // ===== Jobs =====
 
@@ -109,23 +105,17 @@ message GetStatusReq {}
 
 // GetStatusResp tells the Controller's overall current status.
 message GetStatusResp {
-    // has the Controller been asked to start? (e.g., has StartReq been called?)
-    bool wasStartReq = 1;
+    // controller overall run status
+    status.Status runStatus = 1;
 
-    // has the Controller been asked to stop? (e.g., has StartReq been called?)
-    bool wasStopReq = 2;
-
-    // is the Controller still running?
-    bool isRunning = 3;
-
-    // has the Controller encountered any errors? (could still be running)
-    bool isError = 4;
-
+    // controller overall health status
+    status.Health healthStatus = 2;
+    
     // any output messages
-    string outputMsg = 5;
+    string outputMsg = 3;
 
     // any error messages; should only be set if isError == true
-    string errorMsg = 6;
+    string errorMsg = 4;
 }
 
 // StopReq requests that the Controller stop running.
@@ -285,23 +275,6 @@ message GetAllJobSetTemplatesResp {
     repeated JobSetTemplate jsts = 1;
 }
 
-// RemoveJobSetTemplateReq requests that the JobSetTemplate be removed.
-message RemoveJobSetTemplateReq {
-    string name = 1;
-}
-
-// RemoveJobSetTemplateResp tells whether the JobSetTemplate could be removed.
-message RemoveJobSetTemplateResp {
-    // was the JobSetTemplate successfully removed?
-    bool success = 1;
-
-    // any output messages
-    string outputMsg = 2;
-
-    // any error messages; should only be set if success == false
-    string errorMsg = 3;
-}
-
 // ===== Jobs =====
 
 // GetJobReq requests information on the specified Job's status.
@@ -404,34 +377,25 @@ message GetJobSetReq {
     uint64 jobSetID = 1;
 }
 
-enum JobSetStatus {
-    // zero value: no change communicated
-    STATUS_SAME = 0;
-    // JobSet is still starting up / pending
-    STARTUP = 1;
-    // JobSet is in progress
-    RUNNING = 2;
-    // JobSet is no longer running. may have encountered problems and/or
-    // been cancelled.
-    STOPPED = 3;
-}
-
 message JobSetStatusReport {
     // is the JobSet running?
-    JobSetStatus runStatus = 1;
+    status.Status runStatus = 1;
+
+    // what is the JobSet's health?
+    status.Health healthStatus = 2;
 
     // time when the JobSet was started, as Unix time
-    int64 timeStarted = 2;
+    int64 timeStarted = 3;
 
     // time when the JobSet stopped running, as Unix time
-    int64 timeFinished = 3;
+    int64 timeFinished = 4;
 
     // logged output, if any. should be short messages; anything
     // lengthy should be separately logged or reported elsewhere
-    string outputMessages = 4;
+    string outputMessages = 5;
 
     // logged errors, if any
-    string errorMessages = 5;
+    string errorMessages = 6;
 }
 
 // GetJobSetResp returns information on the specified JobSet's status.

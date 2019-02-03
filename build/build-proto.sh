@@ -5,5 +5,6 @@
 # Generates Golang protobuf code from .proto files.
 # Should be run from the top-level peridot-core directory.
 
+protoc -I ./ ./pkg/status/status.proto --go_out=plugins=grpc,paths=source_relative:.
 protoc -I ./ ./pkg/agent/agent.proto --go_out=plugins=grpc,paths=source_relative:.
 protoc -I ./ ./pkg/controller/controller.proto --go_out=plugins=grpc,paths=source_relative:.

@@ -10,6 +10,7 @@ import (
 
 	"github.com/swinslow/peridot-core/internal/jobcontroller"
 	pbc "github.com/swinslow/peridot-core/pkg/controller"
+	pbs "github.com/swinslow/peridot-core/pkg/status"
 )
 
 // Controller is the full collection of data about the status of the
@@ -27,17 +28,9 @@ type Controller struct {
 
 	// ===== status =====
 
-	// has the Controller been asked to start? (e.g., has StartReq been called?)
-	wasStartReq bool
-
-	// has the Controller been asked to stop? (e.g., has StartReq been called?)
-	wasStopReq bool
-
-	// is the Controller still running?
-	isRunning bool
-
-	// has the Controller encountered any errors? (could still be running)
-	isError bool
+	// controller's overall run and health status
+	runStatus    pbs.Status
+	healthStatus pbs.Health
 
 	// any status output messages
 	outputMsg string
@@ -47,9 +40,21 @@ type Controller struct {
 
 	// ===== agents =====
 
-	// mapping of agent name to agent ref. this is used to build the
-	// agent configuration before we create the JobController.
+	// mapping of agent name to agent configuration. this is used to build the
+	// agent config before we create the JobController, and should not be updated
+	// after Start() is successfully called.
 	agents map[string]pbc.AgentConfig
+
+	// ===== jobsets =====
+
+	// mapping of unique ID to all pending, running or completed jobsets.
+	// this is the single source of truth for jobset status.
+	jobSets map[uint64]*jobSet
+
+	// ===== jobset templates =====
+
+	// mapping of jobset template names to registered templates.
+	jobSetTemplates map[string]*jobSetTemplate
 
 	// ===== channels =====
 

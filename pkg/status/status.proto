@@ -1,0 +1,33 @@
+// SPDX-License-Identifier: Apache-2.0 OR GPL-2.0-or-later
+syntax = "proto3";
+
+package status;
+
+option go_package = "github.com/swinslow/peridot-core/pkg/status";
+
+// Status defines the current run status of a Job, JobSet, Controller, etc.
+enum Status {
+    // zero value: no change communicated
+    STATUS_SAME = 0;
+    // still starting up
+    STARTUP = 1;
+    // running and in progress
+    RUNNING = 2;
+    // no longer running. may have encountered problems and/or been cancelled.
+    STOPPED = 3;    
+}
+
+// Health defines the current health of a Job, JobSet, Controller, etc.
+enum Health {
+    // zero value: no change communicated
+    HEALTH_SAME = 0;
+    // no problems encountered yet
+    OK = 1;
+    // has encountered problems resulting in degraded performance
+    // or quality, but is still running and expected to continue
+    DEGRADED = 2;
+    // has encountered unrecoverable problems and should be
+    // treated as failed; will not progress further
+    ERROR = 3;
+}
+
