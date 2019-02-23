@@ -3,64 +3,110 @@
 package controller
 
 import (
+	"time"
+
+	"github.com/swinslow/peridot-core/pkg/agent"
 	pbs "github.com/swinslow/peridot-core/pkg/status"
 )
 
-// jobSet is a collection of one or more related steps, to be run together as
+// Job is data about a single job, running (or to be run) on one agent.
+// it is created within the controller, and its status is updated based
+// on broadcasts from the jobcontroller via the jobRecordStream channel.
+type Job struct {
+	// the job's unique ID
+	JobID uint64
+
+	// the jobSet that this job belongs to
+	JobSetID uint64
+
+	// the step # within the jobSet that this job corresponds to
+	JobSetStepID uint64
+
+	// the step order within the jobSet that this job corresponds to
+	JobSetStepOrder uint64
+
+	// the name of the agent running this job
+	AgentName string
+
+	// the job's configuration
+	Cfg agent.JobConfig
+
+	// the job's current status
+	Status agent.StatusReport
+
+	// has this job been submitted to the JobController?
+	// an instance of any job should only be submitted once.
+	submitted bool
+}
+
+// JobSet is a collection of one or more related steps, to be run together as
 // a pipeline.
-type jobSet struct {
+type JobSet struct {
 	// the jobSet's unique ID
-	jobSetID uint64
+	JobSetID uint64
 
 	// the name of the jobSetTemplate that this jobSet was built from
-	templateName string
+	TemplateName string
 
 	// the current run status and health of the jobSet
-	runStatus    pbs.Status
-	healthStatus pbs.Health
+	RunStatus    pbs.Status
+	HealthStatus pbs.Health
+
+	// time started and finished
+	TimeStarted  time.Time
+	TimeFinished time.Time
 
 	// all of the steps in this jobSet. some steps might be to run
 	// additional separate jobSets.
-	steps []*step
-
-	// which step are we currently on? should equal 0 if done successfully.
-	currentStep uint64
+	Steps []*Step
 
 	// key-value configuration for this jobSet
-	configs map[string]string
+	Configs map[string]string
+
+	// output messages, if any
+	OutputMessages string
+
+	// error messages, if any
+	ErrorMessages string
 }
 
-// step is a single step within a jobSet. each step must be completed before the
+// Step is a single step within a JobSet. each step must be completed before the
 // next one proceeds. a step can be:
 // 1) "agent" - represents a single Job run on the specified Agent
 // 2) "jobset" - represents a separate JobSet with its own collection of steps
 // 3) "concurrent" - represents a collection of steps that can run concurrently
-type step struct {
+type Step struct {
 	// what type of step is this?
-	t StepType
+	T StepType
 
 	// what jobSet does this step belong to?
-	jobSetID uint64
+	JobSetID uint64
 
-	// what is the ordering of this step within that jobSet?
-	stepOrder uint32
+	// what is the unique ID of this step within that jobSet? (will not change)
+	StepID uint64
+
+	// what is the ordering of this step within that jobSet? (could change if
+	// steps are reordered or new steps are inserted)
+	StepOrder uint64
 
 	// what is this step's overall status and health?
-	runStatus    pbs.Status
-	healthStatus pbs.Health
+	RunStatus    pbs.Status
+	HealthStatus pbs.Health
 
 	// "agent" only: what is the corresponding job ID? 0 means not yet assigned
-	agentJobID uint64
+	AgentJobID uint64
 	// "agent" only: what is the corresponding agent's name?
-	agentName string
+	AgentName string
 
 	// "jobset" only: what is the corresponding jobSet ID? 0 means not yet assigned
-	subJobSetID uint64
+	SubJobSetID uint64
 	// "jobset" only: what is the corresponding jobSet's template name?
-	subJobSetTemplateName string
+	SubJobSetTemplateName string
+	// "jobset" only: has a JobSetRequest been submitted yet for this new JobSet?
+	SubJobSetRequestSubmitted bool
 
 	// "concurrent" only: what are the concurrent child steps?
-	concurrentSteps []*step
+	ConcurrentSteps []*Step
 }
 
 // StepType is an enum for the different types of steps and StepTemplates.
@@ -76,13 +122,13 @@ const (
 	StepTypeConcurrent
 )
 
-// jobSetTemplate is a template for creating jobSets.
-type jobSetTemplate struct {
+// JobSetTemplate is a template for creating jobSets.
+type JobSetTemplate struct {
 	// the template's unique name
-	name string
+	Name string
 
 	// the steps comprising this template
-	steps []*StepTemplate
+	Steps []*StepTemplate
 }
 
 // StepTemplate is a single step within a jobSetTemplate. Its values
@@ -103,4 +149,20 @@ type StepTemplate struct {
 	// ConcurrentStepTemplates is for "concurrent" only: what are the
 	// templates for the concurrent child steps?
 	ConcurrentStepTemplates []*StepTemplate
+}
+
+// JobSetRequest is a request to start a new JobSet, based on a
+// JobSetTemplate that has already been defined.
+type JobSetRequest struct {
+	// the name of the requested JobSetTemplate
+	TemplateName string
+
+	// the configuration values for this JobSet instance
+	Configs map[string]string
+
+	// parent JobSet, if being created as a sub-JobSet
+	ParentJobSetID uint64
+
+	// step ID within parent JobSet, if being created as a sub-JobSet
+	ParentJobStepID uint64
 }

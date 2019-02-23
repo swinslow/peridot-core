@@ -20,8 +20,6 @@ type jobsData struct {
 	cfg Config
 	// jobs is where the actual master record of the Job's status lives
 	jobs map[uint64]*JobRecord
-	// nextJobID will be the next available job ID
-	nextJobID uint64
 }
 
 // JobController is the main Job runner function. It creates and returns
@@ -45,9 +43,8 @@ func JobController(ctx context.Context, cfg Config) (chan<- JobRequest, chan<- u
 	errc := make(chan error, 1)
 
 	js := jobsData{
-		cfg:       cfg,
-		jobs:      map[uint64]*JobRecord{},
-		nextJobID: 1,
+		cfg:  cfg,
+		jobs: map[uint64]*JobRecord{},
 	}
 
 	// rc is the response channel for all Job status messages.
@@ -87,10 +84,13 @@ func JobController(ctx context.Context, cfg Config) (chan<- JobRequest, chan<- u
 				n.Done()
 			case jr := <-inJobStream:
 				// the caller has submitted a new JobRequest; create the job
-				newJobID := startNewJob(ctx, &js, jr, &n, rc)
-				// and broadcast the job record, whether or not it was
-				// created successfully
-				updateJobRecord(&js, newJobID, nil, jobRecordStream)
+				newJobID := startNewJob(ctx, &js, jr, &n, rc, errc)
+				// if newJobID is 0, we couldn't create a new job record.
+				if newJobID != 0 {
+					// otherwise broadcast the job record, whether or not it was
+					// started successfully, as long as it actually got a job ID.
+					updateJobRecord(&js, newJobID, nil, jobRecordStream)
+				}
 			case ju := <-rc:
 				// an agent has sent a JobUpdate
 				updateJobRecord(&js, ju.JobID, &ju, jobRecordStream)
@@ -109,11 +109,20 @@ func JobController(ctx context.Context, cfg Config) (chan<- JobRequest, chan<- u
 	return inJobStream, inJobUpdateStream, jobRecordStream, errc
 }
 
-func startNewJob(ctx context.Context, js *jobsData, jr JobRequest, n *sync.WaitGroup, rc chan<- JobUpdate) uint64 {
+func startNewJob(ctx context.Context, js *jobsData, jr JobRequest, n *sync.WaitGroup, rc chan<- JobUpdate, errc chan<- error) uint64 {
 	log.Printf("===> In startNewJob: jr = %s\n", jr.String())
+	// check that this job ID isn't already taken
+	_, ok := js.jobs[jr.JobID]
+	if ok {
+		// job ID is already in use; send error and bail out
+		err := fmt.Errorf("Requested new Job with ID %d but that ID is already used", jr.JobID)
+		errc <- err
+		return 0
+	}
+
 	// create a new JobRecord and fill it in
 	rec := &JobRecord{
-		JobID:     js.nextJobID,
+		JobID:     jr.JobID,
 		AgentName: jr.AgentName,
 		Cfg:       jr.Cfg,
 		// fill in default Status data since we haven't talked to the agent yet
@@ -123,8 +132,6 @@ func startNewJob(ctx context.Context, js *jobsData, jr JobRequest, n *sync.WaitG
 		},
 	}
 	js.jobs[rec.JobID] = rec
-
-	js.nextJobID++
 
 	// check whether the requested agent name is valid
 	ar, ok := js.cfg.Agents[rec.AgentName]

@@ -58,7 +58,10 @@ var xxx_messageInfo_StartReq proto.InternalMessageInfo
 
 // StartResp tells whether the Controller could try to start.
 type StartResp struct {
-	Starting             bool     `protobuf:"varint,1,opt,name=starting,proto3" json:"starting,omitempty"`
+	// will the Controller try to start?
+	Starting bool `protobuf:"varint,1,opt,name=starting,proto3" json:"starting,omitempty"`
+	// if not, why not? should only be set if starting == false
+	ErrorMsg             string   `protobuf:"bytes,2,opt,name=errorMsg,proto3" json:"errorMsg,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -94,6 +97,13 @@ func (m *StartResp) GetStarting() bool {
 		return m.Starting
 	}
 	return false
+}
+
+func (m *StartResp) GetErrorMsg() string {
+	if m != nil {
+		return m.ErrorMsg
+	}
+	return ""
 }
 
 // GetStatusReq requests the current status of the Controller.
@@ -656,8 +666,8 @@ func (m *GetAllAgentsResp) GetCfgs() []*AgentConfig {
 	return nil
 }
 
-// StepAgent is a JobSetTemplate step for a single Agent.
-type StepAgent struct {
+// StepAgentTemplate is a JobSetTemplate step for a single Agent.
+type StepAgentTemplate struct {
 	// the agent's name
 	Name                 string   `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -665,40 +675,40 @@ type StepAgent struct {
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *StepAgent) Reset()         { *m = StepAgent{} }
-func (m *StepAgent) String() string { return proto.CompactTextString(m) }
-func (*StepAgent) ProtoMessage()    {}
-func (*StepAgent) Descriptor() ([]byte, []int) {
+func (m *StepAgentTemplate) Reset()         { *m = StepAgentTemplate{} }
+func (m *StepAgentTemplate) String() string { return proto.CompactTextString(m) }
+func (*StepAgentTemplate) ProtoMessage()    {}
+func (*StepAgentTemplate) Descriptor() ([]byte, []int) {
 	return fileDescriptor_d329ddaa36318286, []int{13}
 }
 
-func (m *StepAgent) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_StepAgent.Unmarshal(m, b)
+func (m *StepAgentTemplate) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_StepAgentTemplate.Unmarshal(m, b)
 }
-func (m *StepAgent) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_StepAgent.Marshal(b, m, deterministic)
+func (m *StepAgentTemplate) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_StepAgentTemplate.Marshal(b, m, deterministic)
 }
-func (m *StepAgent) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_StepAgent.Merge(m, src)
+func (m *StepAgentTemplate) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_StepAgentTemplate.Merge(m, src)
 }
-func (m *StepAgent) XXX_Size() int {
-	return xxx_messageInfo_StepAgent.Size(m)
+func (m *StepAgentTemplate) XXX_Size() int {
+	return xxx_messageInfo_StepAgentTemplate.Size(m)
 }
-func (m *StepAgent) XXX_DiscardUnknown() {
-	xxx_messageInfo_StepAgent.DiscardUnknown(m)
+func (m *StepAgentTemplate) XXX_DiscardUnknown() {
+	xxx_messageInfo_StepAgentTemplate.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_StepAgent proto.InternalMessageInfo
+var xxx_messageInfo_StepAgentTemplate proto.InternalMessageInfo
 
-func (m *StepAgent) GetName() string {
+func (m *StepAgentTemplate) GetName() string {
 	if m != nil {
 		return m.Name
 	}
 	return ""
 }
 
-// StepJobSet is a JobSetTemplate step for a separate JobSet.
-type StepJobSet struct {
+// StepJobSetTemplate is a JobSetTemplate step for a separate JobSet.
+type StepJobSetTemplate struct {
 	// the JobSetTemplate's name
 	Name                 string   `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -706,172 +716,172 @@ type StepJobSet struct {
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *StepJobSet) Reset()         { *m = StepJobSet{} }
-func (m *StepJobSet) String() string { return proto.CompactTextString(m) }
-func (*StepJobSet) ProtoMessage()    {}
-func (*StepJobSet) Descriptor() ([]byte, []int) {
+func (m *StepJobSetTemplate) Reset()         { *m = StepJobSetTemplate{} }
+func (m *StepJobSetTemplate) String() string { return proto.CompactTextString(m) }
+func (*StepJobSetTemplate) ProtoMessage()    {}
+func (*StepJobSetTemplate) Descriptor() ([]byte, []int) {
 	return fileDescriptor_d329ddaa36318286, []int{14}
 }
 
-func (m *StepJobSet) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_StepJobSet.Unmarshal(m, b)
+func (m *StepJobSetTemplate) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_StepJobSetTemplate.Unmarshal(m, b)
 }
-func (m *StepJobSet) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_StepJobSet.Marshal(b, m, deterministic)
+func (m *StepJobSetTemplate) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_StepJobSetTemplate.Marshal(b, m, deterministic)
 }
-func (m *StepJobSet) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_StepJobSet.Merge(m, src)
+func (m *StepJobSetTemplate) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_StepJobSetTemplate.Merge(m, src)
 }
-func (m *StepJobSet) XXX_Size() int {
-	return xxx_messageInfo_StepJobSet.Size(m)
+func (m *StepJobSetTemplate) XXX_Size() int {
+	return xxx_messageInfo_StepJobSetTemplate.Size(m)
 }
-func (m *StepJobSet) XXX_DiscardUnknown() {
-	xxx_messageInfo_StepJobSet.DiscardUnknown(m)
+func (m *StepJobSetTemplate) XXX_DiscardUnknown() {
+	xxx_messageInfo_StepJobSetTemplate.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_StepJobSet proto.InternalMessageInfo
+var xxx_messageInfo_StepJobSetTemplate proto.InternalMessageInfo
 
-func (m *StepJobSet) GetName() string {
+func (m *StepJobSetTemplate) GetName() string {
 	if m != nil {
 		return m.Name
 	}
 	return ""
 }
 
-// StepConcurrent represents a collection of steps that can run concurrently.
-type StepConcurrent struct {
+// StepConcurrentTemplate represents a collection of steps that can run concurrently.
+type StepConcurrentTemplate struct {
 	// the set of concurrent steps
-	Steps                []*Step  `protobuf:"bytes,1,rep,name=steps,proto3" json:"steps,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
+	Steps                []*StepTemplate `protobuf:"bytes,1,rep,name=steps,proto3" json:"steps,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
+	XXX_unrecognized     []byte          `json:"-"`
+	XXX_sizecache        int32           `json:"-"`
 }
 
-func (m *StepConcurrent) Reset()         { *m = StepConcurrent{} }
-func (m *StepConcurrent) String() string { return proto.CompactTextString(m) }
-func (*StepConcurrent) ProtoMessage()    {}
-func (*StepConcurrent) Descriptor() ([]byte, []int) {
+func (m *StepConcurrentTemplate) Reset()         { *m = StepConcurrentTemplate{} }
+func (m *StepConcurrentTemplate) String() string { return proto.CompactTextString(m) }
+func (*StepConcurrentTemplate) ProtoMessage()    {}
+func (*StepConcurrentTemplate) Descriptor() ([]byte, []int) {
 	return fileDescriptor_d329ddaa36318286, []int{15}
 }
 
-func (m *StepConcurrent) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_StepConcurrent.Unmarshal(m, b)
+func (m *StepConcurrentTemplate) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_StepConcurrentTemplate.Unmarshal(m, b)
 }
-func (m *StepConcurrent) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_StepConcurrent.Marshal(b, m, deterministic)
+func (m *StepConcurrentTemplate) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_StepConcurrentTemplate.Marshal(b, m, deterministic)
 }
-func (m *StepConcurrent) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_StepConcurrent.Merge(m, src)
+func (m *StepConcurrentTemplate) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_StepConcurrentTemplate.Merge(m, src)
 }
-func (m *StepConcurrent) XXX_Size() int {
-	return xxx_messageInfo_StepConcurrent.Size(m)
+func (m *StepConcurrentTemplate) XXX_Size() int {
+	return xxx_messageInfo_StepConcurrentTemplate.Size(m)
 }
-func (m *StepConcurrent) XXX_DiscardUnknown() {
-	xxx_messageInfo_StepConcurrent.DiscardUnknown(m)
+func (m *StepConcurrentTemplate) XXX_DiscardUnknown() {
+	xxx_messageInfo_StepConcurrentTemplate.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_StepConcurrent proto.InternalMessageInfo
+var xxx_messageInfo_StepConcurrentTemplate proto.InternalMessageInfo
 
-func (m *StepConcurrent) GetSteps() []*Step {
+func (m *StepConcurrentTemplate) GetSteps() []*StepTemplate {
 	if m != nil {
 		return m.Steps
 	}
 	return nil
 }
 
-// Step represents the union of step types.
-type Step struct {
+// Step represents the union of step types for templates.
+type StepTemplate struct {
 	// Types that are valid to be assigned to S:
-	//	*Step_Agent
-	//	*Step_Jobset
-	//	*Step_Concurrent
-	S                    isStep_S `protobuf_oneof:"s"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
+	//	*StepTemplate_Agent
+	//	*StepTemplate_Jobset
+	//	*StepTemplate_Concurrent
+	S                    isStepTemplate_S `protobuf_oneof:"s"`
+	XXX_NoUnkeyedLiteral struct{}         `json:"-"`
+	XXX_unrecognized     []byte           `json:"-"`
+	XXX_sizecache        int32            `json:"-"`
 }
 
-func (m *Step) Reset()         { *m = Step{} }
-func (m *Step) String() string { return proto.CompactTextString(m) }
-func (*Step) ProtoMessage()    {}
-func (*Step) Descriptor() ([]byte, []int) {
+func (m *StepTemplate) Reset()         { *m = StepTemplate{} }
+func (m *StepTemplate) String() string { return proto.CompactTextString(m) }
+func (*StepTemplate) ProtoMessage()    {}
+func (*StepTemplate) Descriptor() ([]byte, []int) {
 	return fileDescriptor_d329ddaa36318286, []int{16}
 }
 
-func (m *Step) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_Step.Unmarshal(m, b)
+func (m *StepTemplate) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_StepTemplate.Unmarshal(m, b)
 }
-func (m *Step) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_Step.Marshal(b, m, deterministic)
+func (m *StepTemplate) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_StepTemplate.Marshal(b, m, deterministic)
 }
-func (m *Step) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_Step.Merge(m, src)
+func (m *StepTemplate) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_StepTemplate.Merge(m, src)
 }
-func (m *Step) XXX_Size() int {
-	return xxx_messageInfo_Step.Size(m)
+func (m *StepTemplate) XXX_Size() int {
+	return xxx_messageInfo_StepTemplate.Size(m)
 }
-func (m *Step) XXX_DiscardUnknown() {
-	xxx_messageInfo_Step.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_Step proto.InternalMessageInfo
-
-type isStep_S interface {
-	isStep_S()
+func (m *StepTemplate) XXX_DiscardUnknown() {
+	xxx_messageInfo_StepTemplate.DiscardUnknown(m)
 }
 
-type Step_Agent struct {
-	Agent *StepAgent `protobuf:"bytes,1,opt,name=agent,proto3,oneof"`
+var xxx_messageInfo_StepTemplate proto.InternalMessageInfo
+
+type isStepTemplate_S interface {
+	isStepTemplate_S()
 }
 
-type Step_Jobset struct {
-	Jobset *StepJobSet `protobuf:"bytes,2,opt,name=jobset,proto3,oneof"`
+type StepTemplate_Agent struct {
+	Agent *StepAgentTemplate `protobuf:"bytes,1,opt,name=agent,proto3,oneof"`
 }
 
-type Step_Concurrent struct {
-	Concurrent *StepConcurrent `protobuf:"bytes,3,opt,name=concurrent,proto3,oneof"`
+type StepTemplate_Jobset struct {
+	Jobset *StepJobSetTemplate `protobuf:"bytes,2,opt,name=jobset,proto3,oneof"`
 }
 
-func (*Step_Agent) isStep_S() {}
+type StepTemplate_Concurrent struct {
+	Concurrent *StepConcurrentTemplate `protobuf:"bytes,3,opt,name=concurrent,proto3,oneof"`
+}
 
-func (*Step_Jobset) isStep_S() {}
+func (*StepTemplate_Agent) isStepTemplate_S() {}
 
-func (*Step_Concurrent) isStep_S() {}
+func (*StepTemplate_Jobset) isStepTemplate_S() {}
 
-func (m *Step) GetS() isStep_S {
+func (*StepTemplate_Concurrent) isStepTemplate_S() {}
+
+func (m *StepTemplate) GetS() isStepTemplate_S {
 	if m != nil {
 		return m.S
 	}
 	return nil
 }
 
-func (m *Step) GetAgent() *StepAgent {
-	if x, ok := m.GetS().(*Step_Agent); ok {
+func (m *StepTemplate) GetAgent() *StepAgentTemplate {
+	if x, ok := m.GetS().(*StepTemplate_Agent); ok {
 		return x.Agent
 	}
 	return nil
 }
 
-func (m *Step) GetJobset() *StepJobSet {
-	if x, ok := m.GetS().(*Step_Jobset); ok {
+func (m *StepTemplate) GetJobset() *StepJobSetTemplate {
+	if x, ok := m.GetS().(*StepTemplate_Jobset); ok {
 		return x.Jobset
 	}
 	return nil
 }
 
-func (m *Step) GetConcurrent() *StepConcurrent {
-	if x, ok := m.GetS().(*Step_Concurrent); ok {
+func (m *StepTemplate) GetConcurrent() *StepConcurrentTemplate {
+	if x, ok := m.GetS().(*StepTemplate_Concurrent); ok {
 		return x.Concurrent
 	}
 	return nil
 }
 
 // XXX_OneofWrappers is for the internal use of the proto package.
-func (*Step) XXX_OneofWrappers() []interface{} {
+func (*StepTemplate) XXX_OneofWrappers() []interface{} {
 	return []interface{}{
-		(*Step_Agent)(nil),
-		(*Step_Jobset)(nil),
-		(*Step_Concurrent)(nil),
+		(*StepTemplate_Agent)(nil),
+		(*StepTemplate_Jobset)(nil),
+		(*StepTemplate_Concurrent)(nil),
 	}
 }
 
@@ -879,11 +889,11 @@ func (*Step) XXX_OneofWrappers() []interface{} {
 type JobSetTemplate struct {
 	// unique name for the template
 	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	// this JobSet's steps
-	Steps                []*Step  `protobuf:"bytes,2,rep,name=steps,proto3" json:"steps,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
+	// this JobSet's step templates
+	Steps                []*StepTemplate `protobuf:"bytes,2,rep,name=steps,proto3" json:"steps,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
+	XXX_unrecognized     []byte          `json:"-"`
+	XXX_sizecache        int32           `json:"-"`
 }
 
 func (m *JobSetTemplate) Reset()         { *m = JobSetTemplate{} }
@@ -918,7 +928,7 @@ func (m *JobSetTemplate) GetName() string {
 	return ""
 }
 
-func (m *JobSetTemplate) GetSteps() []*Step {
+func (m *JobSetTemplate) GetSteps() []*StepTemplate {
 	if m != nil {
 		return m.Steps
 	}
@@ -1238,28 +1248,118 @@ func (m *GetJobReq) GetJobID() uint64 {
 	return 0
 }
 
-// GetJobResp returns information on the specified Job's status.
-type GetJobResp struct {
+type JobDetails struct {
 	// Job ID
 	JobID uint64 `protobuf:"varint,1,opt,name=jobID,proto3" json:"jobID,omitempty"`
-	// ID of JobSet that this job is part of, if any
+	// ID of JobSet that this job is part of
 	JobSetID uint64 `protobuf:"varint,2,opt,name=jobSetID,proto3" json:"jobSetID,omitempty"`
-	// Step # within JobSet that this job is part of, if any
+	// Step ID # within JobSet that this job is part of
 	JobSetStepID uint64 `protobuf:"varint,3,opt,name=jobSetStepID,proto3" json:"jobSetStepID,omitempty"`
+	// Step order within JobSet that this job is part of
+	JobSetStepOrder uint64 `protobuf:"varint,4,opt,name=jobSetStepOrder,proto3" json:"jobSetStepOrder,omitempty"`
+	// the job's agent name
+	AgentName string `protobuf:"bytes,5,opt,name=agentName,proto3" json:"agentName,omitempty"`
 	// configuration for this job
-	Cfg *agent.JobConfig `protobuf:"bytes,4,opt,name=cfg,proto3" json:"cfg,omitempty"`
+	Cfg *agent.JobConfig `protobuf:"bytes,6,opt,name=cfg,proto3" json:"cfg,omitempty"`
 	// status of this job
-	St                   *agent.StatusReport `protobuf:"bytes,5,opt,name=st,proto3" json:"st,omitempty"`
+	St                   *agent.StatusReport `protobuf:"bytes,7,opt,name=st,proto3" json:"st,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}            `json:"-"`
 	XXX_unrecognized     []byte              `json:"-"`
 	XXX_sizecache        int32               `json:"-"`
+}
+
+func (m *JobDetails) Reset()         { *m = JobDetails{} }
+func (m *JobDetails) String() string { return proto.CompactTextString(m) }
+func (*JobDetails) ProtoMessage()    {}
+func (*JobDetails) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d329ddaa36318286, []int{25}
+}
+
+func (m *JobDetails) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_JobDetails.Unmarshal(m, b)
+}
+func (m *JobDetails) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_JobDetails.Marshal(b, m, deterministic)
+}
+func (m *JobDetails) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_JobDetails.Merge(m, src)
+}
+func (m *JobDetails) XXX_Size() int {
+	return xxx_messageInfo_JobDetails.Size(m)
+}
+func (m *JobDetails) XXX_DiscardUnknown() {
+	xxx_messageInfo_JobDetails.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_JobDetails proto.InternalMessageInfo
+
+func (m *JobDetails) GetJobID() uint64 {
+	if m != nil {
+		return m.JobID
+	}
+	return 0
+}
+
+func (m *JobDetails) GetJobSetID() uint64 {
+	if m != nil {
+		return m.JobSetID
+	}
+	return 0
+}
+
+func (m *JobDetails) GetJobSetStepID() uint64 {
+	if m != nil {
+		return m.JobSetStepID
+	}
+	return 0
+}
+
+func (m *JobDetails) GetJobSetStepOrder() uint64 {
+	if m != nil {
+		return m.JobSetStepOrder
+	}
+	return 0
+}
+
+func (m *JobDetails) GetAgentName() string {
+	if m != nil {
+		return m.AgentName
+	}
+	return ""
+}
+
+func (m *JobDetails) GetCfg() *agent.JobConfig {
+	if m != nil {
+		return m.Cfg
+	}
+	return nil
+}
+
+func (m *JobDetails) GetSt() *agent.StatusReport {
+	if m != nil {
+		return m.St
+	}
+	return nil
+}
+
+// GetJobResp returns information on the specified Job's status.
+type GetJobResp struct {
+	// was a job found with the given ID?
+	Success bool `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	// if success, the job is returned
+	Job *JobDetails `protobuf:"bytes,2,opt,name=job,proto3" json:"job,omitempty"`
+	// if not success, error is returned
+	ErrorMsg             string   `protobuf:"bytes,3,opt,name=errorMsg,proto3" json:"errorMsg,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
 func (m *GetJobResp) Reset()         { *m = GetJobResp{} }
 func (m *GetJobResp) String() string { return proto.CompactTextString(m) }
 func (*GetJobResp) ProtoMessage()    {}
 func (*GetJobResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d329ddaa36318286, []int{25}
+	return fileDescriptor_d329ddaa36318286, []int{26}
 }
 
 func (m *GetJobResp) XXX_Unmarshal(b []byte) error {
@@ -1280,39 +1380,25 @@ func (m *GetJobResp) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetJobResp proto.InternalMessageInfo
 
-func (m *GetJobResp) GetJobID() uint64 {
+func (m *GetJobResp) GetSuccess() bool {
 	if m != nil {
-		return m.JobID
+		return m.Success
 	}
-	return 0
+	return false
 }
 
-func (m *GetJobResp) GetJobSetID() uint64 {
+func (m *GetJobResp) GetJob() *JobDetails {
 	if m != nil {
-		return m.JobSetID
-	}
-	return 0
-}
-
-func (m *GetJobResp) GetJobSetStepID() uint64 {
-	if m != nil {
-		return m.JobSetStepID
-	}
-	return 0
-}
-
-func (m *GetJobResp) GetCfg() *agent.JobConfig {
-	if m != nil {
-		return m.Cfg
+		return m.Job
 	}
 	return nil
 }
 
-func (m *GetJobResp) GetSt() *agent.StatusReport {
+func (m *GetJobResp) GetErrorMsg() string {
 	if m != nil {
-		return m.St
+		return m.ErrorMsg
 	}
-	return nil
+	return ""
 }
 
 // GetAllJobsForJobSetReq requests information on all known Jobs in the
@@ -1328,7 +1414,7 @@ func (m *GetAllJobsForJobSetReq) Reset()         { *m = GetAllJobsForJobSetReq{}
 func (m *GetAllJobsForJobSetReq) String() string { return proto.CompactTextString(m) }
 func (*GetAllJobsForJobSetReq) ProtoMessage()    {}
 func (*GetAllJobsForJobSetReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d329ddaa36318286, []int{26}
+	return fileDescriptor_d329ddaa36318286, []int{27}
 }
 
 func (m *GetAllJobsForJobSetReq) XXX_Unmarshal(b []byte) error {
@@ -1359,7 +1445,7 @@ func (m *GetAllJobsForJobSetReq) GetJobSetID() uint64 {
 // GetAllJobsForJobSetResp returns information on all known Jobs in the
 // JobSet with the given ID.
 type GetAllJobsForJobSetResp struct {
-	Jobs                 []*GetJobResp `protobuf:"bytes,1,rep,name=jobs,proto3" json:"jobs,omitempty"`
+	Jobs                 []*JobDetails `protobuf:"bytes,1,rep,name=jobs,proto3" json:"jobs,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}      `json:"-"`
 	XXX_unrecognized     []byte        `json:"-"`
 	XXX_sizecache        int32         `json:"-"`
@@ -1369,7 +1455,7 @@ func (m *GetAllJobsForJobSetResp) Reset()         { *m = GetAllJobsForJobSetResp
 func (m *GetAllJobsForJobSetResp) String() string { return proto.CompactTextString(m) }
 func (*GetAllJobsForJobSetResp) ProtoMessage()    {}
 func (*GetAllJobsForJobSetResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d329ddaa36318286, []int{27}
+	return fileDescriptor_d329ddaa36318286, []int{28}
 }
 
 func (m *GetAllJobsForJobSetResp) XXX_Unmarshal(b []byte) error {
@@ -1390,7 +1476,7 @@ func (m *GetAllJobsForJobSetResp) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetAllJobsForJobSetResp proto.InternalMessageInfo
 
-func (m *GetAllJobsForJobSetResp) GetJobs() []*GetJobResp {
+func (m *GetAllJobsForJobSetResp) GetJobs() []*JobDetails {
 	if m != nil {
 		return m.Jobs
 	}
@@ -1408,7 +1494,7 @@ func (m *GetAllJobsReq) Reset()         { *m = GetAllJobsReq{} }
 func (m *GetAllJobsReq) String() string { return proto.CompactTextString(m) }
 func (*GetAllJobsReq) ProtoMessage()    {}
 func (*GetAllJobsReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d329ddaa36318286, []int{28}
+	return fileDescriptor_d329ddaa36318286, []int{29}
 }
 
 func (m *GetAllJobsReq) XXX_Unmarshal(b []byte) error {
@@ -1431,7 +1517,7 @@ var xxx_messageInfo_GetAllJobsReq proto.InternalMessageInfo
 
 // GetAllJobsResp returns information on all known Jobs.
 type GetAllJobsResp struct {
-	Jobs                 []*GetJobResp `protobuf:"bytes,1,rep,name=jobs,proto3" json:"jobs,omitempty"`
+	Jobs                 []*JobDetails `protobuf:"bytes,1,rep,name=jobs,proto3" json:"jobs,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}      `json:"-"`
 	XXX_unrecognized     []byte        `json:"-"`
 	XXX_sizecache        int32         `json:"-"`
@@ -1441,7 +1527,7 @@ func (m *GetAllJobsResp) Reset()         { *m = GetAllJobsResp{} }
 func (m *GetAllJobsResp) String() string { return proto.CompactTextString(m) }
 func (*GetAllJobsResp) ProtoMessage()    {}
 func (*GetAllJobsResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d329ddaa36318286, []int{29}
+	return fileDescriptor_d329ddaa36318286, []int{30}
 }
 
 func (m *GetAllJobsResp) XXX_Unmarshal(b []byte) error {
@@ -1462,110 +1548,11 @@ func (m *GetAllJobsResp) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetAllJobsResp proto.InternalMessageInfo
 
-func (m *GetAllJobsResp) GetJobs() []*GetJobResp {
+func (m *GetAllJobsResp) GetJobs() []*JobDetails {
 	if m != nil {
 		return m.Jobs
 	}
 	return nil
-}
-
-// CancelJobReq requests that the specified Job be cancelled.
-type CancelJobReq struct {
-	JobID                uint64   `protobuf:"varint,1,opt,name=jobID,proto3" json:"jobID,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *CancelJobReq) Reset()         { *m = CancelJobReq{} }
-func (m *CancelJobReq) String() string { return proto.CompactTextString(m) }
-func (*CancelJobReq) ProtoMessage()    {}
-func (*CancelJobReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d329ddaa36318286, []int{30}
-}
-
-func (m *CancelJobReq) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_CancelJobReq.Unmarshal(m, b)
-}
-func (m *CancelJobReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_CancelJobReq.Marshal(b, m, deterministic)
-}
-func (m *CancelJobReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_CancelJobReq.Merge(m, src)
-}
-func (m *CancelJobReq) XXX_Size() int {
-	return xxx_messageInfo_CancelJobReq.Size(m)
-}
-func (m *CancelJobReq) XXX_DiscardUnknown() {
-	xxx_messageInfo_CancelJobReq.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_CancelJobReq proto.InternalMessageInfo
-
-func (m *CancelJobReq) GetJobID() uint64 {
-	if m != nil {
-		return m.JobID
-	}
-	return 0
-}
-
-// CancelJobResp tells whether the Job was cancelled successfully.
-type CancelJobResp struct {
-	// was the job successfully cancelled?
-	Success bool `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
-	// any output messages
-	OutputMsg string `protobuf:"bytes,2,opt,name=outputMsg,proto3" json:"outputMsg,omitempty"`
-	// any error messages; should only be set if success == false
-	ErrorMsg             string   `protobuf:"bytes,3,opt,name=errorMsg,proto3" json:"errorMsg,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *CancelJobResp) Reset()         { *m = CancelJobResp{} }
-func (m *CancelJobResp) String() string { return proto.CompactTextString(m) }
-func (*CancelJobResp) ProtoMessage()    {}
-func (*CancelJobResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d329ddaa36318286, []int{31}
-}
-
-func (m *CancelJobResp) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_CancelJobResp.Unmarshal(m, b)
-}
-func (m *CancelJobResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_CancelJobResp.Marshal(b, m, deterministic)
-}
-func (m *CancelJobResp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_CancelJobResp.Merge(m, src)
-}
-func (m *CancelJobResp) XXX_Size() int {
-	return xxx_messageInfo_CancelJobResp.Size(m)
-}
-func (m *CancelJobResp) XXX_DiscardUnknown() {
-	xxx_messageInfo_CancelJobResp.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_CancelJobResp proto.InternalMessageInfo
-
-func (m *CancelJobResp) GetSuccess() bool {
-	if m != nil {
-		return m.Success
-	}
-	return false
-}
-
-func (m *CancelJobResp) GetOutputMsg() string {
-	if m != nil {
-		return m.OutputMsg
-	}
-	return ""
-}
-
-func (m *CancelJobResp) GetErrorMsg() string {
-	if m != nil {
-		return m.ErrorMsg
-	}
-	return ""
 }
 
 // JobSet-specific key-value pairs; will be passed along to all Agents
@@ -1581,7 +1568,7 @@ func (m *JobSetConfig) Reset()         { *m = JobSetConfig{} }
 func (m *JobSetConfig) String() string { return proto.CompactTextString(m) }
 func (*JobSetConfig) ProtoMessage()    {}
 func (*JobSetConfig) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d329ddaa36318286, []int{32}
+	return fileDescriptor_d329ddaa36318286, []int{31}
 }
 
 func (m *JobSetConfig) XXX_Unmarshal(b []byte) error {
@@ -1631,7 +1618,7 @@ func (m *StartJobSetReq) Reset()         { *m = StartJobSetReq{} }
 func (m *StartJobSetReq) String() string { return proto.CompactTextString(m) }
 func (*StartJobSetReq) ProtoMessage()    {}
 func (*StartJobSetReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d329ddaa36318286, []int{33}
+	return fileDescriptor_d329ddaa36318286, []int{32}
 }
 
 func (m *StartJobSetReq) XXX_Unmarshal(b []byte) error {
@@ -1687,7 +1674,7 @@ func (m *StartJobSetResp) Reset()         { *m = StartJobSetResp{} }
 func (m *StartJobSetResp) String() string { return proto.CompactTextString(m) }
 func (*StartJobSetResp) ProtoMessage()    {}
 func (*StartJobSetResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d329ddaa36318286, []int{34}
+	return fileDescriptor_d329ddaa36318286, []int{33}
 }
 
 func (m *StartJobSetResp) XXX_Unmarshal(b []byte) error {
@@ -1755,7 +1742,7 @@ func (m *GetJobSetReq) Reset()         { *m = GetJobSetReq{} }
 func (m *GetJobSetReq) String() string { return proto.CompactTextString(m) }
 func (*GetJobSetReq) ProtoMessage()    {}
 func (*GetJobSetReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d329ddaa36318286, []int{35}
+	return fileDescriptor_d329ddaa36318286, []int{34}
 }
 
 func (m *GetJobSetReq) XXX_Unmarshal(b []byte) error {
@@ -1783,6 +1770,278 @@ func (m *GetJobSetReq) GetJobSetID() uint64 {
 	return 0
 }
 
+// StepAgent is a JobSet step for a single Agent.
+type StepAgent struct {
+	// the agent's name
+	AgentName string `protobuf:"bytes,1,opt,name=agentName,proto3" json:"agentName,omitempty"`
+	// the actual Job's ID
+	JobID                uint64   `protobuf:"varint,2,opt,name=jobID,proto3" json:"jobID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *StepAgent) Reset()         { *m = StepAgent{} }
+func (m *StepAgent) String() string { return proto.CompactTextString(m) }
+func (*StepAgent) ProtoMessage()    {}
+func (*StepAgent) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d329ddaa36318286, []int{35}
+}
+
+func (m *StepAgent) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_StepAgent.Unmarshal(m, b)
+}
+func (m *StepAgent) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_StepAgent.Marshal(b, m, deterministic)
+}
+func (m *StepAgent) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_StepAgent.Merge(m, src)
+}
+func (m *StepAgent) XXX_Size() int {
+	return xxx_messageInfo_StepAgent.Size(m)
+}
+func (m *StepAgent) XXX_DiscardUnknown() {
+	xxx_messageInfo_StepAgent.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_StepAgent proto.InternalMessageInfo
+
+func (m *StepAgent) GetAgentName() string {
+	if m != nil {
+		return m.AgentName
+	}
+	return ""
+}
+
+func (m *StepAgent) GetJobID() uint64 {
+	if m != nil {
+		return m.JobID
+	}
+	return 0
+}
+
+// StepJobSet is a JobSet step for a separate JobSet.
+type StepJobSet struct {
+	// the JobSet's template name
+	TemplateName string `protobuf:"bytes,1,opt,name=templateName,proto3" json:"templateName,omitempty"`
+	// the actual JobSet's ID
+	JobSetID             uint64   `protobuf:"varint,2,opt,name=jobSetID,proto3" json:"jobSetID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *StepJobSet) Reset()         { *m = StepJobSet{} }
+func (m *StepJobSet) String() string { return proto.CompactTextString(m) }
+func (*StepJobSet) ProtoMessage()    {}
+func (*StepJobSet) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d329ddaa36318286, []int{36}
+}
+
+func (m *StepJobSet) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_StepJobSet.Unmarshal(m, b)
+}
+func (m *StepJobSet) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_StepJobSet.Marshal(b, m, deterministic)
+}
+func (m *StepJobSet) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_StepJobSet.Merge(m, src)
+}
+func (m *StepJobSet) XXX_Size() int {
+	return xxx_messageInfo_StepJobSet.Size(m)
+}
+func (m *StepJobSet) XXX_DiscardUnknown() {
+	xxx_messageInfo_StepJobSet.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_StepJobSet proto.InternalMessageInfo
+
+func (m *StepJobSet) GetTemplateName() string {
+	if m != nil {
+		return m.TemplateName
+	}
+	return ""
+}
+
+func (m *StepJobSet) GetJobSetID() uint64 {
+	if m != nil {
+		return m.JobSetID
+	}
+	return 0
+}
+
+// StepConcurrent represents a collection of steps that can run concurrently.
+type StepConcurrent struct {
+	// the set of concurrent steps
+	Steps                []*Step  `protobuf:"bytes,1,rep,name=steps,proto3" json:"steps,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *StepConcurrent) Reset()         { *m = StepConcurrent{} }
+func (m *StepConcurrent) String() string { return proto.CompactTextString(m) }
+func (*StepConcurrent) ProtoMessage()    {}
+func (*StepConcurrent) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d329ddaa36318286, []int{37}
+}
+
+func (m *StepConcurrent) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_StepConcurrent.Unmarshal(m, b)
+}
+func (m *StepConcurrent) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_StepConcurrent.Marshal(b, m, deterministic)
+}
+func (m *StepConcurrent) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_StepConcurrent.Merge(m, src)
+}
+func (m *StepConcurrent) XXX_Size() int {
+	return xxx_messageInfo_StepConcurrent.Size(m)
+}
+func (m *StepConcurrent) XXX_DiscardUnknown() {
+	xxx_messageInfo_StepConcurrent.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_StepConcurrent proto.InternalMessageInfo
+
+func (m *StepConcurrent) GetSteps() []*Step {
+	if m != nil {
+		return m.Steps
+	}
+	return nil
+}
+
+// Step represents the union of step types for s.
+type Step struct {
+	// Types that are valid to be assigned to S:
+	//	*Step_Agent
+	//	*Step_Jobset
+	//	*Step_Concurrent
+	S isStep_S `protobuf_oneof:"s"`
+	// unique ID of step within JobSet
+	StepID uint64 `protobuf:"varint,4,opt,name=stepID,proto3" json:"stepID,omitempty"`
+	// ordering of step within jobSet
+	StepOrder uint64 `protobuf:"varint,5,opt,name=stepOrder,proto3" json:"stepOrder,omitempty"`
+	// step's overall status and health
+	RunStatus            status.Status `protobuf:"varint,6,opt,name=runStatus,proto3,enum=status.Status" json:"runStatus,omitempty"`
+	HealthStatus         status.Health `protobuf:"varint,7,opt,name=healthStatus,proto3,enum=status.Health" json:"healthStatus,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}      `json:"-"`
+	XXX_unrecognized     []byte        `json:"-"`
+	XXX_sizecache        int32         `json:"-"`
+}
+
+func (m *Step) Reset()         { *m = Step{} }
+func (m *Step) String() string { return proto.CompactTextString(m) }
+func (*Step) ProtoMessage()    {}
+func (*Step) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d329ddaa36318286, []int{38}
+}
+
+func (m *Step) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_Step.Unmarshal(m, b)
+}
+func (m *Step) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_Step.Marshal(b, m, deterministic)
+}
+func (m *Step) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Step.Merge(m, src)
+}
+func (m *Step) XXX_Size() int {
+	return xxx_messageInfo_Step.Size(m)
+}
+func (m *Step) XXX_DiscardUnknown() {
+	xxx_messageInfo_Step.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Step proto.InternalMessageInfo
+
+type isStep_S interface {
+	isStep_S()
+}
+
+type Step_Agent struct {
+	Agent *StepAgent `protobuf:"bytes,1,opt,name=agent,proto3,oneof"`
+}
+
+type Step_Jobset struct {
+	Jobset *StepJobSet `protobuf:"bytes,2,opt,name=jobset,proto3,oneof"`
+}
+
+type Step_Concurrent struct {
+	Concurrent *StepConcurrent `protobuf:"bytes,3,opt,name=concurrent,proto3,oneof"`
+}
+
+func (*Step_Agent) isStep_S() {}
+
+func (*Step_Jobset) isStep_S() {}
+
+func (*Step_Concurrent) isStep_S() {}
+
+func (m *Step) GetS() isStep_S {
+	if m != nil {
+		return m.S
+	}
+	return nil
+}
+
+func (m *Step) GetAgent() *StepAgent {
+	if x, ok := m.GetS().(*Step_Agent); ok {
+		return x.Agent
+	}
+	return nil
+}
+
+func (m *Step) GetJobset() *StepJobSet {
+	if x, ok := m.GetS().(*Step_Jobset); ok {
+		return x.Jobset
+	}
+	return nil
+}
+
+func (m *Step) GetConcurrent() *StepConcurrent {
+	if x, ok := m.GetS().(*Step_Concurrent); ok {
+		return x.Concurrent
+	}
+	return nil
+}
+
+func (m *Step) GetStepID() uint64 {
+	if m != nil {
+		return m.StepID
+	}
+	return 0
+}
+
+func (m *Step) GetStepOrder() uint64 {
+	if m != nil {
+		return m.StepOrder
+	}
+	return 0
+}
+
+func (m *Step) GetRunStatus() status.Status {
+	if m != nil {
+		return m.RunStatus
+	}
+	return status.Status_STATUS_SAME
+}
+
+func (m *Step) GetHealthStatus() status.Health {
+	if m != nil {
+		return m.HealthStatus
+	}
+	return status.Health_HEALTH_SAME
+}
+
+// XXX_OneofWrappers is for the internal use of the proto package.
+func (*Step) XXX_OneofWrappers() []interface{} {
+	return []interface{}{
+		(*Step_Agent)(nil),
+		(*Step_Jobset)(nil),
+		(*Step_Concurrent)(nil),
+	}
+}
+
 type JobSetStatusReport struct {
 	// is the JobSet running?
 	RunStatus status.Status `protobuf:"varint,1,opt,name=runStatus,proto3,enum=status.Status" json:"runStatus,omitempty"`
@@ -1806,7 +2065,7 @@ func (m *JobSetStatusReport) Reset()         { *m = JobSetStatusReport{} }
 func (m *JobSetStatusReport) String() string { return proto.CompactTextString(m) }
 func (*JobSetStatusReport) ProtoMessage()    {}
 func (*JobSetStatusReport) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d329ddaa36318286, []int{36}
+	return fileDescriptor_d329ddaa36318286, []int{39}
 }
 
 func (m *JobSetStatusReport) XXX_Unmarshal(b []byte) error {
@@ -1869,22 +2128,91 @@ func (m *JobSetStatusReport) GetErrorMessages() string {
 	return ""
 }
 
-// GetJobSetResp returns information on the specified JobSet's status.
-type GetJobSetResp struct {
+type JobSetDetails struct {
 	// JobSet ID
 	JobSetID uint64 `protobuf:"varint,1,opt,name=jobSetID,proto3" json:"jobSetID,omitempty"`
-	// status of this JobSet
-	St                   *JobSetStatusReport `protobuf:"bytes,2,opt,name=st,proto3" json:"st,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}            `json:"-"`
-	XXX_unrecognized     []byte              `json:"-"`
-	XXX_sizecache        int32               `json:"-"`
+	// name of JobSetTemplate for this JobSet
+	TemplateName string `protobuf:"bytes,2,opt,name=templateName,proto3" json:"templateName,omitempty"`
+	// overall status of this JobSet
+	St *JobSetStatusReport `protobuf:"bytes,3,opt,name=st,proto3" json:"st,omitempty"`
+	// steps
+	Steps                []*Step  `protobuf:"bytes,4,rep,name=steps,proto3" json:"steps,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *JobSetDetails) Reset()         { *m = JobSetDetails{} }
+func (m *JobSetDetails) String() string { return proto.CompactTextString(m) }
+func (*JobSetDetails) ProtoMessage()    {}
+func (*JobSetDetails) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d329ddaa36318286, []int{40}
+}
+
+func (m *JobSetDetails) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_JobSetDetails.Unmarshal(m, b)
+}
+func (m *JobSetDetails) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_JobSetDetails.Marshal(b, m, deterministic)
+}
+func (m *JobSetDetails) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_JobSetDetails.Merge(m, src)
+}
+func (m *JobSetDetails) XXX_Size() int {
+	return xxx_messageInfo_JobSetDetails.Size(m)
+}
+func (m *JobSetDetails) XXX_DiscardUnknown() {
+	xxx_messageInfo_JobSetDetails.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_JobSetDetails proto.InternalMessageInfo
+
+func (m *JobSetDetails) GetJobSetID() uint64 {
+	if m != nil {
+		return m.JobSetID
+	}
+	return 0
+}
+
+func (m *JobSetDetails) GetTemplateName() string {
+	if m != nil {
+		return m.TemplateName
+	}
+	return ""
+}
+
+func (m *JobSetDetails) GetSt() *JobSetStatusReport {
+	if m != nil {
+		return m.St
+	}
+	return nil
+}
+
+func (m *JobSetDetails) GetSteps() []*Step {
+	if m != nil {
+		return m.Steps
+	}
+	return nil
+}
+
+// GetJobSetResp returns information on the specified JobSet's status.
+type GetJobSetResp struct {
+	// was a JobSet found with the given ID?
+	Success bool `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	// if success, the JobSet is returned
+	JobSet *JobSetDetails `protobuf:"bytes,2,opt,name=jobSet,proto3" json:"jobSet,omitempty"`
+	// if not success, error is returned
+	ErrorMsg             string   `protobuf:"bytes,3,opt,name=errorMsg,proto3" json:"errorMsg,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
 func (m *GetJobSetResp) Reset()         { *m = GetJobSetResp{} }
 func (m *GetJobSetResp) String() string { return proto.CompactTextString(m) }
 func (*GetJobSetResp) ProtoMessage()    {}
 func (*GetJobSetResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d329ddaa36318286, []int{37}
+	return fileDescriptor_d329ddaa36318286, []int{41}
 }
 
 func (m *GetJobSetResp) XXX_Unmarshal(b []byte) error {
@@ -1905,18 +2233,25 @@ func (m *GetJobSetResp) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetJobSetResp proto.InternalMessageInfo
 
-func (m *GetJobSetResp) GetJobSetID() uint64 {
+func (m *GetJobSetResp) GetSuccess() bool {
 	if m != nil {
-		return m.JobSetID
+		return m.Success
 	}
-	return 0
+	return false
 }
 
-func (m *GetJobSetResp) GetSt() *JobSetStatusReport {
+func (m *GetJobSetResp) GetJobSet() *JobSetDetails {
 	if m != nil {
-		return m.St
+		return m.JobSet
 	}
 	return nil
+}
+
+func (m *GetJobSetResp) GetErrorMsg() string {
+	if m != nil {
+		return m.ErrorMsg
+	}
+	return ""
 }
 
 // GetAllJobSetsReq requests information on all known JobSets.
@@ -1930,7 +2265,7 @@ func (m *GetAllJobSetsReq) Reset()         { *m = GetAllJobSetsReq{} }
 func (m *GetAllJobSetsReq) String() string { return proto.CompactTextString(m) }
 func (*GetAllJobSetsReq) ProtoMessage()    {}
 func (*GetAllJobSetsReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d329ddaa36318286, []int{38}
+	return fileDescriptor_d329ddaa36318286, []int{42}
 }
 
 func (m *GetAllJobSetsReq) XXX_Unmarshal(b []byte) error {
@@ -1953,7 +2288,7 @@ var xxx_messageInfo_GetAllJobSetsReq proto.InternalMessageInfo
 
 // GetAllJobSetsResp returns information on all known JobSets.
 type GetAllJobSetsResp struct {
-	Sts                  []*GetJobSetResp `protobuf:"bytes,1,rep,name=sts,proto3" json:"sts,omitempty"`
+	JobSets              []*JobSetDetails `protobuf:"bytes,1,rep,name=jobSets,proto3" json:"jobSets,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}         `json:"-"`
 	XXX_unrecognized     []byte           `json:"-"`
 	XXX_sizecache        int32            `json:"-"`
@@ -1963,7 +2298,7 @@ func (m *GetAllJobSetsResp) Reset()         { *m = GetAllJobSetsResp{} }
 func (m *GetAllJobSetsResp) String() string { return proto.CompactTextString(m) }
 func (*GetAllJobSetsResp) ProtoMessage()    {}
 func (*GetAllJobSetsResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d329ddaa36318286, []int{39}
+	return fileDescriptor_d329ddaa36318286, []int{43}
 }
 
 func (m *GetAllJobSetsResp) XXX_Unmarshal(b []byte) error {
@@ -1984,110 +2319,11 @@ func (m *GetAllJobSetsResp) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetAllJobSetsResp proto.InternalMessageInfo
 
-func (m *GetAllJobSetsResp) GetSts() []*GetJobSetResp {
+func (m *GetAllJobSetsResp) GetJobSets() []*JobSetDetails {
 	if m != nil {
-		return m.Sts
+		return m.JobSets
 	}
 	return nil
-}
-
-// CancelJobSetReq requests that the specified JobSet be cancelled.
-type CancelJobSetReq struct {
-	JobSetID             uint64   `protobuf:"varint,1,opt,name=jobSetID,proto3" json:"jobSetID,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *CancelJobSetReq) Reset()         { *m = CancelJobSetReq{} }
-func (m *CancelJobSetReq) String() string { return proto.CompactTextString(m) }
-func (*CancelJobSetReq) ProtoMessage()    {}
-func (*CancelJobSetReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d329ddaa36318286, []int{40}
-}
-
-func (m *CancelJobSetReq) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_CancelJobSetReq.Unmarshal(m, b)
-}
-func (m *CancelJobSetReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_CancelJobSetReq.Marshal(b, m, deterministic)
-}
-func (m *CancelJobSetReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_CancelJobSetReq.Merge(m, src)
-}
-func (m *CancelJobSetReq) XXX_Size() int {
-	return xxx_messageInfo_CancelJobSetReq.Size(m)
-}
-func (m *CancelJobSetReq) XXX_DiscardUnknown() {
-	xxx_messageInfo_CancelJobSetReq.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_CancelJobSetReq proto.InternalMessageInfo
-
-func (m *CancelJobSetReq) GetJobSetID() uint64 {
-	if m != nil {
-		return m.JobSetID
-	}
-	return 0
-}
-
-// CancelJobSetResp tells whether the JobSet was cancelled successfully.
-type CancelJobSetResp struct {
-	// was the JobSet successfully cancelled?
-	Success bool `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
-	// any output messages
-	OutputMsg string `protobuf:"bytes,2,opt,name=outputMsg,proto3" json:"outputMsg,omitempty"`
-	// any error messages; should only be set if success == false
-	ErrorMsg             string   `protobuf:"bytes,3,opt,name=errorMsg,proto3" json:"errorMsg,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *CancelJobSetResp) Reset()         { *m = CancelJobSetResp{} }
-func (m *CancelJobSetResp) String() string { return proto.CompactTextString(m) }
-func (*CancelJobSetResp) ProtoMessage()    {}
-func (*CancelJobSetResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d329ddaa36318286, []int{41}
-}
-
-func (m *CancelJobSetResp) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_CancelJobSetResp.Unmarshal(m, b)
-}
-func (m *CancelJobSetResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_CancelJobSetResp.Marshal(b, m, deterministic)
-}
-func (m *CancelJobSetResp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_CancelJobSetResp.Merge(m, src)
-}
-func (m *CancelJobSetResp) XXX_Size() int {
-	return xxx_messageInfo_CancelJobSetResp.Size(m)
-}
-func (m *CancelJobSetResp) XXX_DiscardUnknown() {
-	xxx_messageInfo_CancelJobSetResp.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_CancelJobSetResp proto.InternalMessageInfo
-
-func (m *CancelJobSetResp) GetSuccess() bool {
-	if m != nil {
-		return m.Success
-	}
-	return false
-}
-
-func (m *CancelJobSetResp) GetOutputMsg() string {
-	if m != nil {
-		return m.OutputMsg
-	}
-	return ""
-}
-
-func (m *CancelJobSetResp) GetErrorMsg() string {
-	if m != nil {
-		return m.ErrorMsg
-	}
-	return ""
 }
 
 func init() {
@@ -2105,10 +2341,10 @@ func init() {
 	proto.RegisterType((*GetAgentResp)(nil), "controller.GetAgentResp")
 	proto.RegisterType((*GetAllAgentsReq)(nil), "controller.GetAllAgentsReq")
 	proto.RegisterType((*GetAllAgentsResp)(nil), "controller.GetAllAgentsResp")
-	proto.RegisterType((*StepAgent)(nil), "controller.StepAgent")
-	proto.RegisterType((*StepJobSet)(nil), "controller.StepJobSet")
-	proto.RegisterType((*StepConcurrent)(nil), "controller.StepConcurrent")
-	proto.RegisterType((*Step)(nil), "controller.Step")
+	proto.RegisterType((*StepAgentTemplate)(nil), "controller.StepAgentTemplate")
+	proto.RegisterType((*StepJobSetTemplate)(nil), "controller.StepJobSetTemplate")
+	proto.RegisterType((*StepConcurrentTemplate)(nil), "controller.StepConcurrentTemplate")
+	proto.RegisterType((*StepTemplate)(nil), "controller.StepTemplate")
 	proto.RegisterType((*JobSetTemplate)(nil), "controller.JobSetTemplate")
 	proto.RegisterType((*AddJobSetTemplateReq)(nil), "controller.AddJobSetTemplateReq")
 	proto.RegisterType((*AddJobSetTemplateResp)(nil), "controller.AddJobSetTemplateResp")
@@ -2117,114 +2353,126 @@ func init() {
 	proto.RegisterType((*GetAllJobSetTemplatesReq)(nil), "controller.GetAllJobSetTemplatesReq")
 	proto.RegisterType((*GetAllJobSetTemplatesResp)(nil), "controller.GetAllJobSetTemplatesResp")
 	proto.RegisterType((*GetJobReq)(nil), "controller.GetJobReq")
+	proto.RegisterType((*JobDetails)(nil), "controller.JobDetails")
 	proto.RegisterType((*GetJobResp)(nil), "controller.GetJobResp")
 	proto.RegisterType((*GetAllJobsForJobSetReq)(nil), "controller.GetAllJobsForJobSetReq")
 	proto.RegisterType((*GetAllJobsForJobSetResp)(nil), "controller.GetAllJobsForJobSetResp")
 	proto.RegisterType((*GetAllJobsReq)(nil), "controller.GetAllJobsReq")
 	proto.RegisterType((*GetAllJobsResp)(nil), "controller.GetAllJobsResp")
-	proto.RegisterType((*CancelJobReq)(nil), "controller.CancelJobReq")
-	proto.RegisterType((*CancelJobResp)(nil), "controller.CancelJobResp")
 	proto.RegisterType((*JobSetConfig)(nil), "controller.JobSetConfig")
 	proto.RegisterType((*StartJobSetReq)(nil), "controller.StartJobSetReq")
 	proto.RegisterType((*StartJobSetResp)(nil), "controller.StartJobSetResp")
 	proto.RegisterType((*GetJobSetReq)(nil), "controller.GetJobSetReq")
+	proto.RegisterType((*StepAgent)(nil), "controller.StepAgent")
+	proto.RegisterType((*StepJobSet)(nil), "controller.StepJobSet")
+	proto.RegisterType((*StepConcurrent)(nil), "controller.StepConcurrent")
+	proto.RegisterType((*Step)(nil), "controller.Step")
 	proto.RegisterType((*JobSetStatusReport)(nil), "controller.JobSetStatusReport")
+	proto.RegisterType((*JobSetDetails)(nil), "controller.JobSetDetails")
 	proto.RegisterType((*GetJobSetResp)(nil), "controller.GetJobSetResp")
 	proto.RegisterType((*GetAllJobSetsReq)(nil), "controller.GetAllJobSetsReq")
 	proto.RegisterType((*GetAllJobSetsResp)(nil), "controller.GetAllJobSetsResp")
-	proto.RegisterType((*CancelJobSetReq)(nil), "controller.CancelJobSetReq")
-	proto.RegisterType((*CancelJobSetResp)(nil), "controller.CancelJobSetResp")
 }
 
 func init() { proto.RegisterFile("pkg/controller/controller.proto", fileDescriptor_d329ddaa36318286) }
 
 var fileDescriptor_d329ddaa36318286 = []byte{
-	// 1356 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xbc, 0x58, 0x6d, 0x73, 0x13, 0xb7,
-	0x13, 0xb7, 0x7d, 0x76, 0x12, 0xaf, 0x1d, 0x27, 0x08, 0x1b, 0x2e, 0x07, 0xff, 0x3f, 0x46, 0x50,
-	0x4a, 0x29, 0x38, 0xc5, 0x74, 0x18, 0x3a, 0xc3, 0x0c, 0x85, 0x04, 0xf2, 0xd4, 0xf2, 0xe2, 0xd2,
-	0xe9, 0x74, 0xe8, 0x9b, 0xfa, 0x41, 0x71, 0xec, 0x38, 0xbe, 0xcb, 0x49, 0x86, 0x61, 0xfa, 0x0d,
-	0xfa, 0x51, 0xda, 0xe9, 0x87, 0xe8, 0x27, 0x6b, 0x47, 0x2b, 0x9d, 0xef, 0x74, 0x77, 0xb6, 0xd3,
-	0x17, 0xf4, 0x4d, 0x22, 0x69, 0x7f, 0x5a, 0xfd, 0x76, 0xb5, 0xbb, 0xda, 0x33, 0xdc, 0xf2, 0xcf,
-	0x06, 0xdb, 0x3d, 0x6f, 0x22, 0x02, 0x6f, 0x3c, 0x66, 0x41, 0x6c, 0xd8, 0xf2, 0x03, 0x4f, 0x78,
-	0x04, 0xa2, 0x15, 0xe7, 0xba, 0x04, 0x73, 0xd1, 0x11, 0x53, 0xae, 0xff, 0x29, 0x90, 0xd3, 0x90,
-	0x82, 0xce, 0x80, 0x4d, 0x84, 0xfa, 0xab, 0x96, 0x29, 0xc0, 0xda, 0xb1, 0xe8, 0x04, 0xc2, 0x65,
-	0x17, 0xf4, 0x73, 0x28, 0xeb, 0x31, 0xf7, 0x89, 0x03, 0x6b, 0x5c, 0x4e, 0x86, 0x93, 0x81, 0x9d,
-	0x6f, 0xe6, 0xef, 0xaf, 0xb9, 0xb3, 0x39, 0xad, 0x41, 0x75, 0x8f, 0x89, 0x63, 0x54, 0x2f, 0x37,
-	0xfe, 0x91, 0x87, 0xf5, 0xd8, 0x02, 0xf7, 0xc9, 0x43, 0x28, 0x07, 0xd3, 0x89, 0x5a, 0xc0, 0xed,
-	0xb5, 0x76, 0xad, 0xa5, 0xf9, 0x68, 0x58, 0x04, 0x20, 0x6d, 0xa8, 0x9e, 0xb2, 0xce, 0x58, 0x9c,
-	0xea, 0x0d, 0x05, 0x73, 0xc3, 0x3e, 0xca, 0x5c, 0x03, 0x43, 0x6e, 0x42, 0xd9, 0x9b, 0x0a, 0x7f,
-	0x2a, 0xbe, 0xe7, 0x03, 0xdb, 0x6a, 0xe6, 0xef, 0x97, 0xdd, 0x68, 0x41, 0xb2, 0x67, 0x41, 0xe0,
-	0x05, 0x52, 0x58, 0x44, 0xe1, 0x6c, 0x4e, 0xcb, 0xb0, 0x7a, 0x2c, 0x3c, 0x5f, 0x12, 0xbf, 0x27,
-	0xad, 0x97, 0xc3, 0xd0, 0x60, 0xcf, 0xf7, 0x0d, 0x83, 0xd5, 0x9c, 0xfe, 0x95, 0x87, 0xca, 0x4b,
-	0xe9, 0xb5, 0x1d, 0x6f, 0x72, 0x32, 0x1c, 0x10, 0x02, 0xc5, 0x49, 0xe7, 0x9c, 0x21, 0xae, 0xec,
-	0xe2, 0x98, 0x6c, 0x82, 0x35, 0x0d, 0xc6, 0xc8, 0xbd, 0xec, 0xca, 0xa1, 0x44, 0xf9, 0x5e, 0x20,
-	0x90, 0xdd, 0xba, 0x8b, 0x63, 0xb9, 0x26, 0x3e, 0xfa, 0x4c, 0x93, 0xc2, 0x31, 0x79, 0x0c, 0xd6,
-	0xd9, 0x7b, 0x6e, 0x97, 0x9a, 0xd6, 0xfd, 0x4a, 0xfb, 0x56, 0x2b, 0x76, 0xbf, 0xb1, 0x33, 0xd5,
-	0xf8, 0xe8, 0x47, 0x57, 0x62, 0x9d, 0xc7, 0xb0, 0xaa, 0xe7, 0xf2, 0xdc, 0x33, 0xf6, 0x51, 0x53,
-	0x91, 0x43, 0x52, 0x87, 0xd2, 0xfb, 0xce, 0x78, 0xca, 0x34, 0x17, 0x35, 0xa1, 0xcf, 0xa0, 0xf2,
-	0xb2, 0xdf, 0xc7, 0x5d, 0x2e, 0xbb, 0x20, 0x5f, 0x80, 0xd5, 0x3b, 0x51, 0x96, 0x56, 0xda, 0xd7,
-	0xe7, 0x1c, 0xea, 0x4a, 0x0c, 0xdd, 0x85, 0x6a, 0xb4, 0x93, 0xfb, 0xc4, 0x86, 0x55, 0x3e, 0xed,
-	0xf5, 0x18, 0xe7, 0xda, 0x51, 0xe1, 0xd4, 0x70, 0x7b, 0x21, 0xe1, 0xf6, 0xdb, 0x50, 0xd9, 0x63,
-	0x62, 0x76, 0x7e, 0x86, 0x0b, 0xa9, 0x87, 0x71, 0x75, 0x99, 0x83, 0x34, 0xfb, 0xc2, 0x72, 0xf6,
-	0x06, 0x27, 0x2b, 0xc1, 0xe9, 0x0a, 0x6c, 0xc8, 0x03, 0xc7, 0x63, 0xdc, 0x85, 0xb1, 0xfc, 0x02,
-	0x36, 0xcd, 0x25, 0xee, 0x93, 0x2f, 0xa1, 0xd8, 0x3b, 0x19, 0x48, 0x12, 0xd6, 0xa2, 0xe3, 0x10,
-	0x44, 0x6f, 0xc9, 0x2c, 0x62, 0x3e, 0x0a, 0x32, 0xad, 0x6c, 0x02, 0x48, 0xc0, 0xa1, 0xd7, 0x3d,
-	0x66, 0xd9, 0x88, 0x67, 0x50, 0x93, 0x88, 0x1d, 0x6f, 0xd2, 0x9b, 0x06, 0x81, 0xd4, 0x73, 0x0f,
-	0x4a, 0x5c, 0x30, 0x3f, 0xa4, 0xb0, 0x19, 0xa7, 0x20, 0xa1, 0xae, 0x12, 0xd3, 0xdf, 0xf3, 0x50,
-	0x94, 0x73, 0xf2, 0x08, 0x4a, 0x98, 0xe6, 0xfa, 0x82, 0x1b, 0xc9, 0x0d, 0x48, 0x6f, 0x3f, 0xe7,
-	0x2a, 0x14, 0xf9, 0x0a, 0x56, 0x46, 0x5e, 0x97, 0x33, 0xa1, 0x5d, 0x7a, 0x2d, 0x89, 0x57, 0x6c,
-	0xf7, 0x73, 0xae, 0xc6, 0x91, 0xe7, 0x20, 0xcb, 0x8e, 0xe6, 0x87, 0x8e, 0xad, 0xb4, 0x9d, 0xe4,
-	0xae, 0xc8, 0x82, 0xfd, 0x9c, 0x1b, 0xc3, 0xbf, 0xb2, 0x20, 0xcf, 0xe9, 0x77, 0x50, 0x53, 0x6a,
-	0x7f, 0x60, 0xe7, 0xfe, 0xb8, 0x23, 0x58, 0x66, 0x5e, 0xcd, 0x4c, 0x2f, 0x2c, 0x36, 0x7d, 0x17,
-	0xea, 0x2f, 0xfb, 0x7d, 0x53, 0xa1, 0x0c, 0xb4, 0x87, 0x60, 0x8d, 0x78, 0xe8, 0x07, 0x83, 0x61,
-	0x02, 0x2b, 0x61, 0xf4, 0x0c, 0x1a, 0x19, 0x5a, 0x16, 0xc6, 0xa2, 0x51, 0x89, 0x0a, 0x8b, 0x2a,
-	0x51, 0x32, 0xfc, 0x1e, 0x40, 0x7d, 0x8f, 0x89, 0x34, 0xe5, 0xac, 0x98, 0xf8, 0x15, 0x1a, 0x19,
-	0xd8, 0x85, 0xc4, 0xb4, 0xe5, 0x85, 0x4b, 0x59, 0xbe, 0x90, 0xa8, 0x03, 0xb6, 0x4a, 0x0a, 0x73,
-	0x23, 0x26, 0xcc, 0x11, 0x6c, 0xcd, 0x91, 0x71, 0x9f, 0xb4, 0xa0, 0x38, 0xe2, 0x22, 0x0c, 0xdb,
-	0x45, 0x1c, 0x10, 0x47, 0x6f, 0x43, 0x59, 0x59, 0x29, 0xdd, 0x50, 0x87, 0xd2, 0xc8, 0xeb, 0x1e,
-	0xec, 0xa2, 0x5d, 0x45, 0x57, 0x4d, 0xe4, 0x63, 0x03, 0x21, 0x86, 0xfb, 0xd9, 0x20, 0x69, 0xcc,
-	0x08, 0xf5, 0x1f, 0xec, 0xa2, 0xfd, 0x45, 0x77, 0x36, 0x27, 0x14, 0xaa, 0x6a, 0x2c, 0xa3, 0xe7,
-	0x60, 0x17, 0x8d, 0x2d, 0xba, 0xc6, 0x1a, 0xa1, 0xaa, 0xbe, 0x14, 0xd1, 0x75, 0x9b, 0x2d, 0xf5,
-	0x62, 0x1e, 0x7a, 0xdd, 0x78, 0x61, 0xb9, 0x03, 0x05, 0x2e, 0xec, 0x12, 0x42, 0xae, 0x6a, 0x48,
-	0xf8, 0x04, 0xca, 0x5a, 0xef, 0x16, 0xb8, 0xa0, 0x5f, 0xc3, 0xb5, 0x99, 0x77, 0xf8, 0x1b, 0x2f,
-	0x50, 0x56, 0x4b, 0xeb, 0xe2, 0x14, 0xf3, 0x26, 0x45, 0xfa, 0x1a, 0xae, 0x67, 0xee, 0xe2, 0x3e,
-	0x79, 0x00, 0x45, 0x99, 0x81, 0xda, 0xa3, 0x46, 0x9e, 0x46, 0x5e, 0x71, 0x11, 0x43, 0x37, 0xf0,
-	0x59, 0xd6, 0x6a, 0xe4, 0x5d, 0x3d, 0x87, 0x5a, 0x7c, 0xe1, 0x5f, 0xaa, 0xbb, 0x0b, 0xd5, 0x9d,
-	0xce, 0xa4, 0xc7, 0xc6, 0x0b, 0xef, 0xa7, 0x07, 0xeb, 0x31, 0xd4, 0x27, 0xca, 0x9c, 0xa7, 0x50,
-	0x55, 0x3e, 0xd1, 0x0f, 0xf2, 0x65, 0x1f, 0xc1, 0x9f, 0x64, 0x65, 0xed, 0x04, 0x22, 0xba, 0x06,
-	0x1b, 0x56, 0x47, 0x5c, 0xbc, 0x8d, 0xd2, 0x2d, 0x9c, 0x92, 0x87, 0xba, 0xea, 0xab, 0xba, 0x63,
-	0xa7, 0x63, 0xd7, 0x28, 0xfb, 0x7f, 0xe6, 0x61, 0xc3, 0x50, 0xbd, 0xec, 0xa1, 0x9c, 0x1b, 0x9f,
-	0xe1, 0x95, 0x58, 0xcb, 0xaf, 0xc4, 0xf4, 0x60, 0x71, 0x91, 0x07, 0x4b, 0xa9, 0xda, 0x53, 0x9d,
-	0xd5, 0x93, 0x65, 0xe1, 0xf8, 0x5b, 0x01, 0xc8, 0xa1, 0x4e, 0x8f, 0x28, 0xbe, 0xff, 0x83, 0x26,
-	0xaf, 0x09, 0x15, 0x31, 0x3c, 0x67, 0xe8, 0x57, 0xd6, 0xc7, 0x28, 0xb0, 0xdc, 0xf8, 0x92, 0x4c,
-	0x66, 0x39, 0x7d, 0x33, 0x9c, 0x0c, 0xf9, 0x29, 0xeb, 0xa3, 0x0f, 0x2c, 0xd7, 0x58, 0x23, 0xf7,
-	0xa0, 0xa6, 0x7d, 0xc2, 0x38, 0xef, 0x0c, 0x18, 0xd7, 0xce, 0x48, 0xac, 0x92, 0xbb, 0xb0, 0xae,
-	0xdc, 0x13, 0xc2, 0x56, 0x10, 0x66, 0x2e, 0xd2, 0x9f, 0x31, 0xa9, 0x62, 0xb7, 0xbc, 0xc0, 0x73,
-	0xa4, 0x85, 0x35, 0x42, 0x55, 0xe0, 0xff, 0xa7, 0x23, 0x28, 0x55, 0x2e, 0x48, 0xd8, 0x7d, 0x28,
-	0x39, 0x26, 0xed, 0xb7, 0x70, 0x25, 0xb1, 0x86, 0x2d, 0x89, 0x15, 0xd5, 0xd5, 0xad, 0x74, 0x8c,
-	0x68, 0x72, 0xae, 0x44, 0xd1, 0x47, 0xb0, 0x31, 0x4b, 0xc9, 0x4b, 0x5c, 0xf7, 0x09, 0x6c, 0x9a,
-	0xf0, 0x4f, 0x93, 0xc4, 0xed, 0xbf, 0xcb, 0x00, 0x3b, 0x33, 0xe2, 0xe4, 0x29, 0x94, 0xf0, 0x56,
-	0x49, 0xdd, 0x7c, 0xe2, 0xd5, 0xd7, 0x89, 0xd3, 0xc8, 0x58, 0xe5, 0x3e, 0xcd, 0x91, 0x57, 0xf8,
-	0x66, 0xe8, 0x88, 0xb1, 0x13, 0xae, 0x98, 0x7d, 0xa4, 0x38, 0x5b, 0x73, 0x24, 0xa8, 0xe3, 0x89,
-	0x6c, 0x9b, 0x3c, 0x9f, 0x5c, 0x35, 0x0f, 0xc1, 0xaf, 0x04, 0xa7, 0x9e, 0x5e, 0xc4, 0x4d, 0x2f,
-	0x60, 0x2d, 0xec, 0x8b, 0x89, 0xd9, 0x14, 0x46, 0x7d, 0xb6, 0x63, 0x67, 0x0b, 0x42, 0x05, 0x61,
-	0xbf, 0x6b, 0x2a, 0x88, 0x35, 0xca, 0x8e, 0x9d, 0x2d, 0x40, 0x05, 0x47, 0xaa, 0x61, 0x0e, 0x9b,
-	0x55, 0x72, 0x23, 0x89, 0x8d, 0x75, 0xb6, 0xce, 0xcd, 0xf9, 0x42, 0x54, 0xf6, 0x0e, 0xae, 0xa4,
-	0x5a, 0x1f, 0xd2, 0x4c, 0xd0, 0x4f, 0x35, 0x2b, 0xce, 0xed, 0x25, 0x88, 0x50, 0x77, 0xaa, 0x7b,
-	0x31, 0x75, 0x67, 0x35, 0x42, 0xa6, 0xee, 0xcc, 0xf6, 0x87, 0xe6, 0xc8, 0x09, 0x76, 0x46, 0xe9,
-	0x06, 0x84, 0xdc, 0x4d, 0x1b, 0x9c, 0xee, 0x5f, 0x9c, 0xcf, 0x2e, 0x81, 0xc2, 0x73, 0xbe, 0x81,
-	0x15, 0x45, 0x81, 0x34, 0xb2, 0x6a, 0xf2, 0x85, 0x33, 0xa7, 0x54, 0xd3, 0x1c, 0xf9, 0x05, 0xae,
-	0x66, 0xbc, 0xe7, 0x84, 0x66, 0x1e, 0x6d, 0xb4, 0x09, 0xce, 0x9d, 0xa5, 0x18, 0x3c, 0xe1, 0x35,
-	0x36, 0x45, 0x5a, 0x48, 0xb6, 0xb2, 0x37, 0x49, 0x7d, 0xce, 0x3c, 0x51, 0x98, 0x4b, 0xb3, 0xd4,
-	0x37, 0x73, 0x29, 0xfe, 0xf2, 0x9b, 0xb9, 0x64, 0xbc, 0xf6, 0x34, 0x47, 0xf6, 0xa1, 0x12, 0x7b,
-	0x08, 0x89, 0x93, 0xca, 0xdb, 0xc8, 0xb8, 0x1b, 0x73, 0x65, 0xb1, 0xcc, 0xd6, 0x7a, 0xec, 0x39,
-	0x45, 0x2e, 0x9d, 0xd9, 0x86, 0x8e, 0xb7, 0xb1, 0x1e, 0x48, 0x56, 0x4f, 0x72, 0x73, 0xde, 0x7d,
-	0xa3, 0x7b, 0xfe, 0xb7, 0x40, 0x1a, 0xa6, 0x5c, 0xbc, 0x38, 0x9a, 0x29, 0x97, 0xa8, 0xb2, 0x66,
-	0xca, 0x25, 0x6b, 0x2a, 0xcd, 0xbd, 0x7a, 0xfc, 0x6e, 0x7b, 0x30, 0x14, 0xa7, 0xd3, 0x6e, 0xab,
-	0xe7, 0x9d, 0x6f, 0xf3, 0x0f, 0xc3, 0x09, 0x1f, 0x7b, 0x1f, 0xb6, 0x7d, 0x16, 0x0c, 0xfb, 0x9e,
-	0x78, 0xd4, 0xf3, 0x02, 0xb6, 0x6d, 0xfe, 0xfa, 0xd3, 0x5d, 0xc1, 0xdf, 0x6d, 0x9e, 0xfc, 0x13,
-	0x00, 0x00, 0xff, 0xff, 0x3f, 0x33, 0x91, 0x2f, 0x16, 0x12, 0x00, 0x00,
+	// 1514 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xbc, 0x58, 0xdd, 0x72, 0x13, 0xc7,
+	0x12, 0xb6, 0xb4, 0xfa, 0xb1, 0x5a, 0xb2, 0x6c, 0x0f, 0xb6, 0x91, 0x17, 0x38, 0x98, 0x81, 0xc3,
+	0xf1, 0x21, 0x20, 0xc7, 0x26, 0xa1, 0x48, 0x15, 0x55, 0x14, 0x58, 0x80, 0x30, 0x09, 0xa9, 0x5a,
+	0x53, 0xa9, 0x14, 0x57, 0xd1, 0xcf, 0x58, 0x96, 0x2c, 0x6b, 0x97, 0x9d, 0x11, 0x84, 0xca, 0x1b,
+	0xe4, 0x45, 0x72, 0x91, 0xca, 0x43, 0x24, 0x97, 0x79, 0x98, 0xdc, 0xe4, 0x05, 0x52, 0xd3, 0x33,
+	0xab, 0xdd, 0xd9, 0x5d, 0xad, 0xcc, 0x4d, 0x6e, 0xec, 0x9d, 0x9e, 0x6f, 0x7a, 0xfa, 0xbf, 0x7b,
+	0x04, 0xd7, 0xbd, 0xb3, 0xc1, 0x5e, 0xcf, 0x9d, 0x08, 0xdf, 0x1d, 0x8f, 0x99, 0x1f, 0xf9, 0x6c,
+	0x7a, 0xbe, 0x2b, 0x5c, 0x02, 0x21, 0xc5, 0xbe, 0x2c, 0xc1, 0x5c, 0x74, 0xc4, 0x94, 0xeb, 0x7f,
+	0x0a, 0x64, 0x6f, 0xca, 0x8d, 0xce, 0x80, 0x4d, 0x84, 0xfa, 0xab, 0xc8, 0x14, 0x60, 0xf9, 0x58,
+	0x74, 0x7c, 0xe1, 0xb0, 0x77, 0xf4, 0x10, 0x2a, 0xfa, 0x9b, 0x7b, 0xc4, 0x86, 0x65, 0x2e, 0x17,
+	0xc3, 0xc9, 0xa0, 0x91, 0xdb, 0xc9, 0xed, 0x2e, 0x3b, 0xb3, 0xb5, 0xdc, 0x63, 0xbe, 0xef, 0xfa,
+	0xdf, 0xf0, 0x41, 0x23, 0xbf, 0x93, 0xdb, 0xad, 0x38, 0xb3, 0x35, 0xad, 0x43, 0xed, 0x05, 0x13,
+	0xc7, 0x78, 0xb5, 0x64, 0xfa, 0x6b, 0x0e, 0x56, 0x22, 0x04, 0xee, 0x91, 0xbb, 0x50, 0xf1, 0xa7,
+	0x13, 0x45, 0x40, 0xd6, 0xf5, 0x83, 0x7a, 0x53, 0xcb, 0xaa, 0x61, 0x21, 0x80, 0x1c, 0x40, 0xed,
+	0x94, 0x75, 0xc6, 0xe2, 0x54, 0x1f, 0xc8, 0x9b, 0x07, 0xda, 0xb8, 0xe7, 0x18, 0x18, 0x72, 0x15,
+	0x2a, 0xee, 0x54, 0x78, 0x53, 0x21, 0x05, 0xb4, 0x50, 0xc0, 0x90, 0x60, 0x48, 0x5f, 0x88, 0x49,
+	0x5f, 0x81, 0xf2, 0xb1, 0x70, 0x3d, 0x29, 0xf8, 0x6d, 0x69, 0x19, 0xf9, 0x19, 0x18, 0xc3, 0xf5,
+	0x3c, 0xc3, 0x18, 0x6a, 0x4d, 0x7f, 0xcf, 0x41, 0xf5, 0x89, 0xb4, 0xe8, 0xa1, 0x3b, 0x39, 0x19,
+	0x0e, 0x08, 0x81, 0xc2, 0xa4, 0x73, 0xce, 0x10, 0x57, 0x71, 0xf0, 0x9b, 0xac, 0x81, 0x35, 0xf5,
+	0xc7, 0xda, 0x56, 0xf2, 0x53, 0xa2, 0x3c, 0xd7, 0x17, 0x28, 0xdd, 0x8a, 0x83, 0xdf, 0x92, 0x26,
+	0x3e, 0x7a, 0x4c, 0x0b, 0x85, 0xdf, 0x64, 0x1f, 0xac, 0xb3, 0xf7, 0xbc, 0x51, 0xdc, 0xb1, 0x76,
+	0xab, 0x07, 0xd7, 0x9b, 0x11, 0xdf, 0x47, 0xee, 0x54, 0xdf, 0xaf, 0xbe, 0x73, 0x24, 0xd6, 0xde,
+	0x87, 0xb2, 0x5e, 0xcb, 0x7b, 0xcf, 0xd8, 0x47, 0x2d, 0x8a, 0xfc, 0x24, 0x1b, 0x50, 0x7c, 0xdf,
+	0x19, 0x4f, 0x99, 0x96, 0x45, 0x2d, 0xe8, 0x43, 0xa8, 0x3e, 0xe9, 0xf7, 0xf1, 0x94, 0xc3, 0xde,
+	0x91, 0xff, 0x83, 0xd5, 0x3b, 0x51, 0x9a, 0x56, 0x0f, 0x2e, 0xcf, 0xb9, 0xd4, 0x91, 0x18, 0xda,
+	0x82, 0x5a, 0x78, 0x92, 0x7b, 0xa4, 0x01, 0x65, 0x3e, 0xed, 0xf5, 0x18, 0xe7, 0xda, 0x50, 0xc1,
+	0x32, 0x33, 0x68, 0x6e, 0x40, 0xf5, 0x05, 0x13, 0xb3, 0xfb, 0x53, 0x4c, 0x48, 0x5d, 0x8c, 0xab,
+	0x8b, 0x5c, 0xa4, 0xa5, 0xcf, 0x2f, 0x96, 0xde, 0x90, 0xc9, 0x8a, 0xc9, 0xb4, 0x0e, 0xab, 0xf2,
+	0xc2, 0xf1, 0x18, 0x4f, 0x61, 0x2c, 0x3f, 0x86, 0x35, 0x93, 0xc4, 0x3d, 0xf2, 0x19, 0x14, 0x7a,
+	0x27, 0x03, 0x29, 0x84, 0x95, 0x75, 0x1d, 0x82, 0xe8, 0xff, 0x60, 0xfd, 0x58, 0x30, 0x0f, 0x37,
+	0xde, 0xb0, 0x73, 0x6f, 0xdc, 0x11, 0x2c, 0x55, 0xdb, 0x5d, 0x20, 0x12, 0x78, 0xe4, 0x76, 0x8f,
+	0x59, 0x36, 0xb2, 0x0d, 0x5b, 0x12, 0x79, 0xe8, 0x4e, 0x7a, 0x53, 0xdf, 0x8f, 0xf2, 0x6d, 0x42,
+	0x91, 0x0b, 0xe6, 0x05, 0xa2, 0x35, 0xa2, 0xa2, 0xc9, 0x23, 0x01, 0xd0, 0x51, 0x30, 0xfa, 0x67,
+	0x0e, 0x6a, 0x51, 0x3a, 0xf9, 0x12, 0x8a, 0x58, 0x2a, 0x74, 0x20, 0x5c, 0x8b, 0x33, 0x30, 0xd4,
+	0x68, 0x2f, 0x39, 0x0a, 0x4d, 0x1e, 0x42, 0x69, 0xe4, 0x76, 0x39, 0x13, 0xda, 0x05, 0xff, 0x89,
+	0x9f, 0x33, 0xb5, 0x6a, 0x2f, 0x39, 0x1a, 0x4f, 0x5a, 0x20, 0x4b, 0x99, 0xd6, 0x03, 0x1d, 0x52,
+	0x3d, 0xa0, 0xf1, 0xd3, 0x49, 0x4d, 0xdb, 0x4b, 0x4e, 0xe4, 0xdc, 0x53, 0x0b, 0x72, 0x9c, 0xbe,
+	0x81, 0xfa, 0x62, 0xe3, 0x85, 0x26, 0xca, 0x5f, 0xcc, 0x44, 0x2d, 0xd8, 0x78, 0xd2, 0xef, 0x9b,
+	0x8c, 0x65, 0xc0, 0xde, 0x05, 0x6b, 0xc4, 0x03, 0x3b, 0xd9, 0x51, 0x2e, 0x31, 0xac, 0x84, 0xd1,
+	0x33, 0xd8, 0x4c, 0xe1, 0x92, 0x19, 0xd3, 0x46, 0x45, 0xcb, 0x67, 0x55, 0xb4, 0x78, 0x18, 0xdf,
+	0x81, 0x8d, 0x17, 0x4c, 0x24, 0x45, 0x4e, 0x8b, 0xa5, 0x9f, 0x60, 0x33, 0x05, 0x9b, 0x29, 0x98,
+	0xd6, 0x3c, 0x7f, 0x21, 0xcd, 0x33, 0x05, 0xb5, 0xa1, 0xa1, 0x92, 0xcb, 0x3c, 0x88, 0x89, 0xf7,
+	0x0a, 0xb6, 0xe7, 0xec, 0x71, 0x8f, 0x34, 0xa1, 0x30, 0xe2, 0x22, 0x08, 0xf3, 0x2c, 0x19, 0x10,
+	0x47, 0x6f, 0x40, 0x45, 0x69, 0x29, 0xcd, 0xb0, 0x01, 0xc5, 0x91, 0xdb, 0x7d, 0xd9, 0x42, 0xbd,
+	0x0a, 0x8e, 0x5a, 0xd0, 0xbf, 0x73, 0x00, 0x47, 0x6e, 0xb7, 0xc5, 0x44, 0x67, 0x38, 0xe6, 0xe9,
+	0x20, 0xa9, 0xcc, 0x08, 0xf9, 0xbf, 0x6c, 0xa1, 0xfe, 0x05, 0x67, 0xb6, 0x26, 0x14, 0x6a, 0xea,
+	0x5b, 0x46, 0xd1, 0xcb, 0x16, 0x2a, 0x5b, 0x70, 0x0c, 0x1a, 0xd9, 0x85, 0xd5, 0x70, 0xfd, 0xad,
+	0xdf, 0x67, 0x3e, 0x56, 0xfe, 0x82, 0x13, 0x27, 0x4b, 0xef, 0x63, 0x6a, 0xbd, 0x96, 0x0e, 0x2b,
+	0x2a, 0xef, 0xcf, 0x08, 0x84, 0xaa, 0x7a, 0x57, 0x42, 0x17, 0xac, 0x35, 0x55, 0x77, 0x3f, 0x72,
+	0xbb, 0xd1, 0x42, 0x77, 0x13, 0xf2, 0x5c, 0x34, 0xca, 0x08, 0xb9, 0xa4, 0x21, 0x41, 0x4b, 0x96,
+	0xbd, 0xc7, 0xc9, 0x73, 0x41, 0xc7, 0x00, 0x81, 0x61, 0x32, 0x7d, 0xbe, 0x0b, 0xd6, 0xc8, 0xed,
+	0x6a, 0x9f, 0x6f, 0xc5, 0xec, 0xad, 0x6d, 0xe6, 0x48, 0x48, 0xa6, 0xbf, 0xbf, 0x80, 0xad, 0x99,
+	0x4f, 0xf9, 0x73, 0xd7, 0x57, 0xbe, 0x92, 0x3e, 0x89, 0x1a, 0x36, 0x67, 0x1a, 0x96, 0x3e, 0x83,
+	0xcb, 0xa9, 0xa7, 0xb8, 0x47, 0xee, 0x40, 0x41, 0xd6, 0x11, 0x1d, 0x07, 0xf3, 0xe4, 0x42, 0x0c,
+	0x5d, 0xc5, 0xa1, 0x44, 0xb3, 0x91, 0x11, 0xf6, 0x08, 0xea, 0x51, 0xc2, 0x27, 0xb2, 0x7b, 0x00,
+	0x35, 0x25, 0x88, 0x9e, 0x01, 0x2e, 0xda, 0x77, 0xbf, 0x87, 0x3a, 0x4e, 0x5c, 0xa1, 0xee, 0x0d,
+	0x28, 0x8f, 0xb8, 0x72, 0xb4, 0x3a, 0x1d, 0x2c, 0xc9, 0x5d, 0xdd, 0x68, 0x52, 0x4a, 0x55, 0xf4,
+	0x6e, 0xdd, 0x69, 0x7e, 0xcb, 0xc1, 0xaa, 0xc1, 0x7a, 0x51, 0x6f, 0x9e, 0x1b, 0xca, 0x81, 0x1d,
+	0xac, 0xa4, 0x1d, 0xc2, 0x68, 0x51, 0x76, 0x30, 0xcb, 0x54, 0x21, 0xab, 0x4c, 0x15, 0x13, 0x65,
+	0xaa, 0x36, 0x2b, 0x3d, 0x8b, 0x62, 0xe0, 0xb1, 0x9c, 0x53, 0x75, 0xfb, 0x31, 0x73, 0x23, 0x17,
+	0xcf, 0x8d, 0x59, 0xe6, 0xe6, 0xa3, 0xe9, 0xfd, 0x35, 0x40, 0xd8, 0x87, 0x64, 0xae, 0x0a, 0x5d,
+	0x21, 0x22, 0x4c, 0x0c, 0x5a, 0x96, 0x81, 0xe8, 0x43, 0xe9, 0xc4, 0x68, 0x5f, 0x22, 0xb7, 0xcd,
+	0xce, 0xbb, 0x16, 0x6f, 0x2b, 0x41, 0x3b, 0xf9, 0x23, 0x0f, 0x05, 0xb9, 0x26, 0xf7, 0xcc, 0x4e,
+	0xbb, 0x99, 0xda, 0x69, 0xc3, 0x0e, 0xfb, 0x79, 0xac, 0xc3, 0x6e, 0xa5, 0x77, 0xd8, 0x48, 0x67,
+	0x7d, 0x94, 0xd2, 0x59, 0xed, 0xf9, 0x9d, 0xd5, 0xec, 0xa8, 0x64, 0x0b, 0x4a, 0x5c, 0xd5, 0x31,
+	0x55, 0xa0, 0xf4, 0x4a, 0xda, 0x9e, 0xcf, 0x6a, 0x57, 0x11, 0xb7, 0x42, 0x82, 0x39, 0xe7, 0x97,
+	0x3e, 0x75, 0xce, 0x2f, 0x2f, 0x9e, 0xf3, 0x55, 0xa7, 0xff, 0x39, 0x0f, 0xe4, 0x48, 0x17, 0xcc,
+	0xb0, 0xa0, 0xfd, 0x0b, 0xaf, 0x8c, 0x1d, 0xa8, 0x8a, 0xe1, 0x39, 0xc3, 0x2c, 0x63, 0x7d, 0x34,
+	0xaa, 0xe5, 0x44, 0x49, 0x18, 0x59, 0xc3, 0x73, 0xf6, 0x7c, 0x38, 0x19, 0xf2, 0x53, 0xd6, 0x47,
+	0xeb, 0x59, 0x8e, 0x41, 0x23, 0xb7, 0xa1, 0xae, 0x33, 0x84, 0x71, 0xde, 0x19, 0x30, 0xae, 0x53,
+	0x23, 0x46, 0x25, 0xb7, 0x60, 0x45, 0x25, 0x4b, 0x00, 0x2b, 0x21, 0xcc, 0x24, 0xd2, 0x5f, 0x72,
+	0xb0, 0xa2, 0x8c, 0x11, 0xf4, 0xae, 0x8c, 0x44, 0x4a, 0x44, 0x7e, 0x3e, 0x25, 0xf2, 0x9b, 0xd8,
+	0x39, 0xac, 0xe4, 0x24, 0x97, 0xb4, 0xb9, 0x6c, 0x22, 0x61, 0xec, 0x17, 0xb2, 0x63, 0xff, 0x47,
+	0xac, 0xc0, 0x17, 0xaa, 0x4e, 0xfb, 0x18, 0xee, 0xc7, 0xb3, 0x70, 0xdf, 0x4e, 0x8a, 0x11, 0x94,
+	0x63, 0x0d, 0xcc, 0x6c, 0x3c, 0x24, 0x98, 0xe2, 0xd5, 0x51, 0x2c, 0xff, 0x6d, 0x58, 0x8f, 0xd1,
+	0xb8, 0x47, 0xee, 0x43, 0x59, 0xb1, 0x0b, 0x12, 0x39, 0xe3, 0xe2, 0x00, 0x79, 0xf0, 0xd7, 0x32,
+	0xc0, 0xe1, 0x0c, 0x45, 0x1e, 0x40, 0x11, 0xa3, 0x81, 0x6c, 0x98, 0x86, 0x50, 0x4f, 0x6e, 0x7b,
+	0x33, 0x85, 0xca, 0x3d, 0xba, 0x44, 0x9e, 0xe2, 0x90, 0xa2, 0x23, 0xad, 0x11, 0x2b, 0xba, 0xb3,
+	0xd7, 0xb5, 0xbd, 0x3d, 0x67, 0x07, 0x79, 0xdc, 0x97, 0xd5, 0xc5, 0xf5, 0xc8, 0x25, 0xf3, 0x12,
+	0x7c, 0xde, 0xda, 0x1b, 0x49, 0x22, 0x1e, 0x7a, 0x0c, 0xcb, 0xc1, 0x83, 0x8e, 0x98, 0xaf, 0x99,
+	0xf0, 0x81, 0x68, 0x37, 0xd2, 0x37, 0x02, 0x06, 0xc1, 0x43, 0xcd, 0x64, 0x10, 0x79, 0xe1, 0xd9,
+	0x8d, 0xf4, 0x0d, 0x64, 0xf0, 0x4a, 0xbd, 0xf4, 0x82, 0x57, 0x16, 0xb9, 0x12, 0xc7, 0x46, 0x9e,
+	0x64, 0xf6, 0xd5, 0xf9, 0x9b, 0xc8, 0xec, 0x2d, 0xac, 0x27, 0x66, 0x6d, 0xb2, 0x13, 0x13, 0x3f,
+	0x31, 0x1d, 0xdb, 0x37, 0x16, 0x20, 0x02, 0xde, 0x89, 0x71, 0xd9, 0xe4, 0x9d, 0x36, 0x79, 0x9b,
+	0xbc, 0x53, 0xe7, 0x6d, 0xba, 0x44, 0x4e, 0x70, 0x14, 0x4f, 0x4e, 0xbc, 0xe4, 0x56, 0x52, 0xe1,
+	0xe4, 0xc0, 0x6c, 0xff, 0xf7, 0x02, 0x28, 0xbc, 0xe7, 0x2b, 0x28, 0x29, 0x11, 0xc8, 0x66, 0x5a,
+	0x67, 0x7f, 0x67, 0xcf, 0x69, 0xf8, 0x74, 0x89, 0xfc, 0x00, 0x97, 0x52, 0x46, 0x31, 0x42, 0x53,
+	0xaf, 0x36, 0x26, 0x3c, 0xfb, 0xe6, 0x42, 0x0c, 0xde, 0xf0, 0x0c, 0x07, 0x52, 0xbd, 0x49, 0xb6,
+	0xd3, 0x0f, 0x49, 0x7e, 0xf6, 0xbc, 0x2d, 0x64, 0xd3, 0x86, 0x6a, 0x64, 0x14, 0x22, 0x76, 0x22,
+	0xe7, 0x42, 0xc1, 0xae, 0xcc, 0xdd, 0x8b, 0x64, 0xa5, 0xe6, 0xd3, 0x48, 0xf5, 0x63, 0x5a, 0x56,
+	0x1a, 0x3c, 0x5e, 0x47, 0x46, 0x4f, 0x59, 0x31, 0xc8, 0xd5, 0x79, 0xbe, 0x42, 0xd5, 0xae, 0x65,
+	0xec, 0x4a, 0x7e, 0x4f, 0xf7, 0xdf, 0xee, 0x0d, 0x86, 0xe2, 0x74, 0xda, 0x6d, 0xf6, 0xdc, 0xf3,
+	0x3d, 0xfe, 0x61, 0x38, 0xe1, 0x63, 0xf7, 0xc3, 0x9e, 0xc7, 0xfc, 0x61, 0xdf, 0x15, 0xf7, 0x7a,
+	0xae, 0xcf, 0xf6, 0xcc, 0x5f, 0x10, 0xbb, 0x25, 0xfc, 0xed, 0xef, 0xfe, 0x3f, 0x01, 0x00, 0x00,
+	0xff, 0xff, 0x76, 0xdf, 0xde, 0x03, 0x5a, 0x14, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -2274,8 +2522,6 @@ type ControllerClient interface {
 	GetAllJobsForJobSet(ctx context.Context, in *GetAllJobsForJobSetReq, opts ...grpc.CallOption) (*GetAllJobsForJobSetResp, error)
 	// GetAllJobs requests information on all known Jobs.
 	GetAllJobs(ctx context.Context, in *GetAllJobsReq, opts ...grpc.CallOption) (*GetAllJobsResp, error)
-	// CancelJob requests that the Controller cancel the specified Job.
-	CancelJob(ctx context.Context, in *CancelJobReq, opts ...grpc.CallOption) (*CancelJobResp, error)
 	// StartJobSet requests that the Controller begin a new JobSet, with the
 	// specified configuration.
 	StartJobSet(ctx context.Context, in *StartJobSetReq, opts ...grpc.CallOption) (*StartJobSetResp, error)
@@ -2283,8 +2529,6 @@ type ControllerClient interface {
 	GetJobSet(ctx context.Context, in *GetJobSetReq, opts ...grpc.CallOption) (*GetJobSetResp, error)
 	// GetAllJobSets requests information on all known JobSets.
 	GetAllJobSets(ctx context.Context, in *GetAllJobSetsReq, opts ...grpc.CallOption) (*GetAllJobSetsResp, error)
-	// CancelJobSet requests that the Controller cancel the specified JobSet.
-	CancelJobSet(ctx context.Context, in *CancelJobSetReq, opts ...grpc.CallOption) (*CancelJobSetResp, error)
 }
 
 type controllerClient struct {
@@ -2403,15 +2647,6 @@ func (c *controllerClient) GetAllJobs(ctx context.Context, in *GetAllJobsReq, op
 	return out, nil
 }
 
-func (c *controllerClient) CancelJob(ctx context.Context, in *CancelJobReq, opts ...grpc.CallOption) (*CancelJobResp, error) {
-	out := new(CancelJobResp)
-	err := c.cc.Invoke(ctx, "/controller.Controller/CancelJob", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *controllerClient) StartJobSet(ctx context.Context, in *StartJobSetReq, opts ...grpc.CallOption) (*StartJobSetResp, error) {
 	out := new(StartJobSetResp)
 	err := c.cc.Invoke(ctx, "/controller.Controller/StartJobSet", in, out, opts...)
@@ -2433,15 +2668,6 @@ func (c *controllerClient) GetJobSet(ctx context.Context, in *GetJobSetReq, opts
 func (c *controllerClient) GetAllJobSets(ctx context.Context, in *GetAllJobSetsReq, opts ...grpc.CallOption) (*GetAllJobSetsResp, error) {
 	out := new(GetAllJobSetsResp)
 	err := c.cc.Invoke(ctx, "/controller.Controller/GetAllJobSets", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *controllerClient) CancelJobSet(ctx context.Context, in *CancelJobSetReq, opts ...grpc.CallOption) (*CancelJobSetResp, error) {
-	out := new(CancelJobSetResp)
-	err := c.cc.Invoke(ctx, "/controller.Controller/CancelJobSet", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -2485,8 +2711,6 @@ type ControllerServer interface {
 	GetAllJobsForJobSet(context.Context, *GetAllJobsForJobSetReq) (*GetAllJobsForJobSetResp, error)
 	// GetAllJobs requests information on all known Jobs.
 	GetAllJobs(context.Context, *GetAllJobsReq) (*GetAllJobsResp, error)
-	// CancelJob requests that the Controller cancel the specified Job.
-	CancelJob(context.Context, *CancelJobReq) (*CancelJobResp, error)
 	// StartJobSet requests that the Controller begin a new JobSet, with the
 	// specified configuration.
 	StartJobSet(context.Context, *StartJobSetReq) (*StartJobSetResp, error)
@@ -2494,8 +2718,6 @@ type ControllerServer interface {
 	GetJobSet(context.Context, *GetJobSetReq) (*GetJobSetResp, error)
 	// GetAllJobSets requests information on all known JobSets.
 	GetAllJobSets(context.Context, *GetAllJobSetsReq) (*GetAllJobSetsResp, error)
-	// CancelJobSet requests that the Controller cancel the specified JobSet.
-	CancelJobSet(context.Context, *CancelJobSetReq) (*CancelJobSetResp, error)
 }
 
 func RegisterControllerServer(s *grpc.Server, srv ControllerServer) {
@@ -2718,24 +2940,6 @@ func _Controller_GetAllJobs_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Controller_CancelJob_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CancelJobReq)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ControllerServer).CancelJob(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/controller.Controller/CancelJob",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ControllerServer).CancelJob(ctx, req.(*CancelJobReq))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _Controller_StartJobSet_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(StartJobSetReq)
 	if err := dec(in); err != nil {
@@ -2786,24 +2990,6 @@ func _Controller_GetAllJobSets_Handler(srv interface{}, ctx context.Context, dec
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ControllerServer).GetAllJobSets(ctx, req.(*GetAllJobSetsReq))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Controller_CancelJobSet_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CancelJobSetReq)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ControllerServer).CancelJobSet(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/controller.Controller/CancelJobSet",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ControllerServer).CancelJobSet(ctx, req.(*CancelJobSetReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -2861,10 +3047,6 @@ var _Controller_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Controller_GetAllJobs_Handler,
 		},
 		{
-			MethodName: "CancelJob",
-			Handler:    _Controller_CancelJob_Handler,
-		},
-		{
 			MethodName: "StartJobSet",
 			Handler:    _Controller_StartJobSet_Handler,
 		},
@@ -2875,10 +3057,6 @@ var _Controller_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetAllJobSets",
 			Handler:    _Controller_GetAllJobSets_Handler,
-		},
-		{
-			MethodName: "CancelJobSet",
-			Handler:    _Controller_CancelJobSet_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

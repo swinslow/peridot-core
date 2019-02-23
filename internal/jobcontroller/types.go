@@ -38,6 +38,9 @@ type AgentRef struct {
 
 // JobRequest defines the metadata needed to start a Job.
 type JobRequest struct {
+	// requested job ID
+	JobID uint64
+
 	// AgentName identifies the Agent that is (or was, or will be) running
 	// this Job.
 	AgentName string

@@ -70,9 +70,6 @@ service Controller {
     // GetAllJobs requests information on all known Jobs.
     rpc GetAllJobs(GetAllJobsReq) returns (GetAllJobsResp) {}
 
-    // CancelJob requests that the Controller cancel the specified Job.
-    rpc CancelJob(CancelJobReq) returns (CancelJobResp) {}
-
     // ===== JobSet =====
 
     // StartJobSet requests that the Controller begin a new JobSet, with the
@@ -85,9 +82,6 @@ service Controller {
     // GetAllJobSets requests information on all known JobSets.
     rpc GetAllJobSets(GetAllJobSetsReq) returns (GetAllJobSetsResp) {}
 
-    // CancelJobSet requests that the Controller cancel the specified JobSet.
-    rpc CancelJobSet(CancelJobSetReq) returns (CancelJobSetResp) {}
-
 }
 
 // ===== Controller startup and status =====
@@ -97,7 +91,11 @@ message StartReq {}
 
 // StartResp tells whether the Controller could try to start.
 message StartResp {
+    // will the Controller try to start?
     bool starting = 1;
+
+    // if not, why not? should only be set if starting == false
+    string errorMsg = 2;
 }
 
 // GetStatusReq requests the current status of the Controller.
@@ -194,30 +192,30 @@ message GetAllAgentsResp {
 
 // ===== JobSetTemplates =====
 
-// StepAgent is a JobSetTemplate step for a single Agent.
-message StepAgent {
+// StepAgentTemplate is a JobSetTemplate step for a single Agent.
+message StepAgentTemplate {
     // the agent's name
     string name = 1;
 }
 
-// StepJobSet is a JobSetTemplate step for a separate JobSet.
-message StepJobSet {
+// StepJobSetTemplate is a JobSetTemplate step for a separate JobSet.
+message StepJobSetTemplate {
     // the JobSetTemplate's name
     string name = 1;
 }
 
-// StepConcurrent represents a collection of steps that can run concurrently.
-message StepConcurrent {
+// StepConcurrentTemplate represents a collection of steps that can run concurrently.
+message StepConcurrentTemplate {
     // the set of concurrent steps
-    repeated Step steps = 1;
+    repeated StepTemplate steps = 1;
 }
 
-// Step represents the union of step types.
-message Step {
+// Step represents the union of step types for templates.
+message StepTemplate {
     oneof s {
-        StepAgent agent = 1;
-        StepJobSet jobset = 2;
-        StepConcurrent concurrent = 3;
+        StepAgentTemplate agent = 1;
+        StepJobSetTemplate jobset = 2;
+        StepConcurrentTemplate concurrent = 3;
     }
 }
 
@@ -226,8 +224,8 @@ message JobSetTemplate {
     // unique name for the template
     string name = 1;
 
-    // this JobSet's steps
-    repeated Step steps = 2;
+    // this JobSet's step templates
+    repeated StepTemplate steps = 2;
 }
 
 // AddJobSetTemplateReq requests that a new JobSetTemplate be registered with
@@ -282,22 +280,39 @@ message GetJobReq {
     uint64 jobID = 1;
 }
 
-// GetJobResp returns information on the specified Job's status.
-message GetJobResp {
+message JobDetails {
     // Job ID
     uint64 jobID = 1;
 
-    // ID of JobSet that this job is part of, if any
+    // ID of JobSet that this job is part of
     uint64 jobSetID = 2;
 
-    // Step # within JobSet that this job is part of, if any
+    // Step ID # within JobSet that this job is part of
     uint64 jobSetStepID = 3;
 
+    // Step order within JobSet that this job is part of
+    uint64 jobSetStepOrder = 4;
+
+    // the job's agent name
+    string agentName = 5;
+
     // configuration for this job
-    agent.JobConfig cfg = 4;
+    agent.JobConfig cfg = 6;
 
     // status of this job
-    agent.StatusReport st = 5;
+    agent.StatusReport st = 7;
+}
+
+// GetJobResp returns information on the specified Job's status.
+message GetJobResp {
+    // was a job found with the given ID?
+    bool success = 1;
+
+    // if success, the job is returned
+    JobDetails job = 2;
+
+    // if not success, error is returned
+    string errorMsg = 3;
 }
 
 // GetAllJobsForJobSetReq requests information on all known Jobs in the
@@ -309,7 +324,7 @@ message GetAllJobsForJobSetReq {
 // GetAllJobsForJobSetResp returns information on all known Jobs in the
 // JobSet with the given ID.
 message GetAllJobsForJobSetResp {
-    repeated GetJobResp jobs = 1;
+    repeated JobDetails jobs = 1;
 }
 
 // GetAllJobsReq requests information on all known Jobs.
@@ -317,24 +332,7 @@ message GetAllJobsReq {}
 
 // GetAllJobsResp returns information on all known Jobs.
 message GetAllJobsResp {
-    repeated GetJobResp jobs = 1;
-}
-
-// CancelJobReq requests that the specified Job be cancelled.
-message CancelJobReq {
-    uint64 jobID = 1;
-}
-
-// CancelJobResp tells whether the Job was cancelled successfully.
-message CancelJobResp {
-    // was the job successfully cancelled?
-    bool success = 1;
-
-    // any output messages
-    string outputMsg = 2;
-
-    // any error messages; should only be set if success == false
-    string errorMsg = 3;
+    repeated JobDetails jobs = 1;
 }
 
 // ===== JobSet =====
@@ -377,6 +375,49 @@ message GetJobSetReq {
     uint64 jobSetID = 1;
 }
 
+// StepAgent is a JobSet step for a single Agent.
+message StepAgent {
+    // the agent's name
+    string agentName = 1;
+
+    // the actual Job's ID
+    uint64 jobID = 2;
+}
+
+// StepJobSet is a JobSet step for a separate JobSet.
+message StepJobSet {
+    // the JobSet's template name
+    string templateName = 1;
+
+    // the actual JobSet's ID
+    uint64 jobSetID = 2;
+}
+
+// StepConcurrent represents a collection of steps that can run concurrently.
+message StepConcurrent {
+    // the set of concurrent steps
+    repeated Step steps = 1;
+}
+
+// Step represents the union of step types for s.
+message Step {
+    oneof s {
+        StepAgent agent = 1;
+        StepJobSet jobset = 2;
+        StepConcurrent concurrent = 3;
+    }
+
+    // unique ID of step within JobSet
+    uint64 stepID = 4;
+
+    // ordering of step within jobSet
+    uint64 stepOrder = 5;
+
+    // step's overall status and health
+    status.Status runStatus = 6;
+    status.Health healthStatus = 7;
+}
+
 message JobSetStatusReport {
     // is the JobSet running?
     status.Status runStatus = 1;
@@ -398,13 +439,31 @@ message JobSetStatusReport {
     string errorMessages = 6;
 }
 
-// GetJobSetResp returns information on the specified JobSet's status.
-message GetJobSetResp {
+message JobSetDetails {
     // JobSet ID
     uint64 jobSetID = 1;
 
-    // status of this JobSet
-    JobSetStatusReport st = 2;
+    // name of JobSetTemplate for this JobSet
+    string templateName = 2;
+
+    // overall status of this JobSet
+    JobSetStatusReport st = 3;
+
+    // steps
+    repeated Step steps = 4;
+
+}
+
+// GetJobSetResp returns information on the specified JobSet's status.
+message GetJobSetResp {
+    // was a JobSet found with the given ID?
+    bool success = 1;
+
+    // if success, the JobSet is returned
+    JobSetDetails jobSet = 2;
+
+    // if not success, error is returned
+    string errorMsg = 3;
 }
 
 // GetAllJobSetsReq requests information on all known JobSets.
@@ -412,22 +471,5 @@ message GetAllJobSetsReq {}
 
 // GetAllJobSetsResp returns information on all known JobSets.
 message GetAllJobSetsResp {
-    repeated GetJobSetResp sts = 1;
-}
-
-// CancelJobSetReq requests that the specified JobSet be cancelled.
-message CancelJobSetReq {
-    uint64 jobSetID = 1;
-}
-
-// CancelJobSetResp tells whether the JobSet was cancelled successfully.
-message CancelJobSetResp {
-    // was the JobSet successfully cancelled?
-    bool success = 1;
-
-    // any output messages
-    string outputMsg = 2;
-
-    // any error messages; should only be set if success == false
-    string errorMsg = 3;
+    repeated JobSetDetails jobSets = 1;
 }
