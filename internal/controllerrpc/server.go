@@ -18,11 +18,13 @@ const (
 	port = ":8900"
 )
 
-type cServer struct {
-	c *controller.Controller
+// CServer is a gRPC server wrapping a peridot Controller.
+type CServer struct {
+	C *controller.Controller
 }
 
-func runGRPCServer(cs *cServer) {
+// RunGRPCServer runs the gRPC server.
+func RunGRPCServer(cs *CServer) {
 	// open a socket for listening
 	lis, err := net.Listen("tcp", port)
 	if err != nil {

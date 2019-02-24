@@ -24,16 +24,23 @@ func (c *Controller) createNewJobSets() {
 		// retrieve the next JobSetRequest from the list
 		jsr := e.Value.(JobSetRequest)
 
+		var jobSetID uint64
+		if jsr.RequestedJobSetID != 0 {
+			jobSetID = jsr.RequestedJobSetID
+		} else {
+			jobSetID = c.nextJobSetID
+			c.nextJobSetID++
+		}
+
 		// first things first, create a new JobSet entry in our jobSets map
 		js := &JobSet{
-			JobSetID:     c.nextJobSetID,
+			JobSetID:     jobSetID,
 			TemplateName: jsr.TemplateName,
 			RunStatus:    pbs.Status_STARTUP,
 			HealthStatus: pbs.Health_OK,
 			TimeStarted:  time.Now(),
 			// leave TimeFinished as zero value
 		}
-		c.nextJobSetID++
 		c.jobSets[js.JobSetID] = js
 		// also add to active JobSet list
 		c.activeJobSets[js.JobSetID] = js

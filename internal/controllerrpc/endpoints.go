@@ -10,8 +10,8 @@ import (
 )
 
 // Start corresponds to the Start endpoint for pkg/controller.
-func (cs *cServer) Start(ctx context.Context, req *pbc.StartReq) (*pbc.StartResp, error) {
-	err := cs.c.Start()
+func (cs *CServer) Start(ctx context.Context, req *pbc.StartReq) (*pbc.StartResp, error) {
+	err := cs.C.Start()
 	if err == nil {
 		return &pbc.StartResp{Starting: true}, nil
 	}
@@ -23,8 +23,8 @@ func (cs *cServer) Start(ctx context.Context, req *pbc.StartReq) (*pbc.StartResp
 }
 
 // GetStatus corresponds to the GetStatus endpoint for pkg/controller.
-func (cs *cServer) GetStatus(ctx context.Context, req *pbc.GetStatusReq) (*pbc.GetStatusResp, error) {
-	runStatus, healthStatus, outputMsg, errorMsg := cs.c.GetStatus()
+func (cs *CServer) GetStatus(ctx context.Context, req *pbc.GetStatusReq) (*pbc.GetStatusResp, error) {
+	runStatus, healthStatus, outputMsg, errorMsg := cs.C.GetStatus()
 
 	return &pbc.GetStatusResp{
 		RunStatus:    runStatus,
@@ -35,14 +35,14 @@ func (cs *cServer) GetStatus(ctx context.Context, req *pbc.GetStatusReq) (*pbc.G
 }
 
 // Stop corresponds to the Stop endpoint for pkg/controller.
-func (cs *cServer) Stop(ctx context.Context, req *pbc.StopReq) (*pbc.StopResp, error) {
-	cs.c.Stop()
+func (cs *CServer) Stop(ctx context.Context, req *pbc.StopReq) (*pbc.StopResp, error) {
+	cs.C.Stop()
 	return &pbc.StopResp{}, nil
 }
 
 // AddAgent corresponds to the AddAgent endpoint for pkg/controller.
-func (cs *cServer) AddAgent(ctx context.Context, req *pbc.AddAgentReq) (*pbc.AddAgentResp, error) {
-	err := cs.c.AddAgent(req.Cfg)
+func (cs *CServer) AddAgent(ctx context.Context, req *pbc.AddAgentReq) (*pbc.AddAgentResp, error) {
+	err := cs.C.AddAgent(req.Cfg)
 	if err != nil {
 		return &pbc.AddAgentResp{
 			Success:  false,
@@ -53,8 +53,8 @@ func (cs *cServer) AddAgent(ctx context.Context, req *pbc.AddAgentReq) (*pbc.Add
 }
 
 // GetAgent corresponds to the GetAgent endpoint for pkg/controller.
-func (cs *cServer) GetAgent(ctx context.Context, req *pbc.GetAgentReq) (*pbc.GetAgentResp, error) {
-	cfg, err := cs.c.GetAgent(req.Name)
+func (cs *CServer) GetAgent(ctx context.Context, req *pbc.GetAgentReq) (*pbc.GetAgentResp, error) {
+	cfg, err := cs.C.GetAgent(req.Name)
 	if err != nil {
 		return &pbc.GetAgentResp{
 			Success:  false,
@@ -68,8 +68,8 @@ func (cs *cServer) GetAgent(ctx context.Context, req *pbc.GetAgentReq) (*pbc.Get
 }
 
 // GetAllAgents corresponds to the GetAllAgents endpoint for pkg/controller.
-func (cs *cServer) GetAllAgents(ctx context.Context, req *pbc.GetAllAgentsReq) (*pbc.GetAllAgentsResp, error) {
-	cfgs := cs.c.GetAllAgents()
+func (cs *CServer) GetAllAgents(ctx context.Context, req *pbc.GetAllAgentsReq) (*pbc.GetAllAgentsResp, error) {
+	cfgs := cs.C.GetAllAgents()
 	return &pbc.GetAllAgentsResp{Cfgs: cfgs}, nil
 }
 
@@ -116,12 +116,12 @@ func createProtoStepsFromStepTemplate(inSteps []*controller.StepTemplate) []*pbc
 }
 
 // AddJobSetTemplate corresponds to the AddJobSetTemplate endpoint for pkg/controller.
-func (cs *cServer) AddJobSetTemplate(ctx context.Context, req *pbc.AddJobSetTemplateReq) (*pbc.AddJobSetTemplateResp, error) {
+func (cs *CServer) AddJobSetTemplate(ctx context.Context, req *pbc.AddJobSetTemplateReq) (*pbc.AddJobSetTemplateResp, error) {
 	// build the jobSetTemplate structure to send to the controller
 	name := req.Jst.Name
 	steps := createStepTemplateFromProtoSteps(req.Jst.Steps)
 
-	err := cs.c.AddJobSetTemplate(name, steps)
+	err := cs.C.AddJobSetTemplate(name, steps)
 	if err != nil {
 		return &pbc.AddJobSetTemplateResp{
 			Success:  false,
@@ -132,8 +132,8 @@ func (cs *cServer) AddJobSetTemplate(ctx context.Context, req *pbc.AddJobSetTemp
 }
 
 // GetJobSetTemplate corresponds to the GetJobSetTemplate endpoint for pkg/controller.
-func (cs *cServer) GetJobSetTemplate(ctx context.Context, req *pbc.GetJobSetTemplateReq) (*pbc.GetJobSetTemplateResp, error) {
-	steps, err := cs.c.GetJobSetTemplate(req.Name)
+func (cs *CServer) GetJobSetTemplate(ctx context.Context, req *pbc.GetJobSetTemplateReq) (*pbc.GetJobSetTemplateResp, error) {
+	steps, err := cs.C.GetJobSetTemplate(req.Name)
 	if err != nil {
 		return &pbc.GetJobSetTemplateResp{
 			Success:  false,
@@ -152,8 +152,8 @@ func (cs *cServer) GetJobSetTemplate(ctx context.Context, req *pbc.GetJobSetTemp
 }
 
 // GetAllJobSetTemplates corresponds to the GetAllJobSetTemplates endpoint for pkg/controller.
-func (cs *cServer) GetAllJobSetTemplates(ctx context.Context, req *pbc.GetAllJobSetTemplatesReq) (*pbc.GetAllJobSetTemplatesResp, error) {
-	templates := cs.c.GetAllJobSetTemplates()
+func (cs *CServer) GetAllJobSetTemplates(ctx context.Context, req *pbc.GetAllJobSetTemplatesReq) (*pbc.GetAllJobSetTemplatesResp, error) {
+	templates := cs.C.GetAllJobSetTemplates()
 
 	protoTemplates := []*pbc.JobSetTemplate{}
 	for name, steps := range templates {
@@ -168,8 +168,8 @@ func (cs *cServer) GetAllJobSetTemplates(ctx context.Context, req *pbc.GetAllJob
 }
 
 // GetJob corresponds to the GetJob endpoint for pkg/controller.
-func (cs *cServer) GetJob(ctx context.Context, req *pbc.GetJobReq) (*pbc.GetJobResp, error) {
-	job, err := cs.c.GetJob(req.JobID)
+func (cs *CServer) GetJob(ctx context.Context, req *pbc.GetJobReq) (*pbc.GetJobResp, error) {
+	job, err := cs.C.GetJob(req.JobID)
 	if err != nil {
 		return &pbc.GetJobResp{
 			Success:  false,
@@ -193,8 +193,8 @@ func (cs *cServer) GetJob(ctx context.Context, req *pbc.GetJobReq) (*pbc.GetJobR
 }
 
 // GetAllJobs corresponds to the GetAllJobs endpoint for pkg/controller.
-func (cs *cServer) GetAllJobs(ctx context.Context, req *pbc.GetAllJobsReq) (*pbc.GetAllJobsResp, error) {
-	jobs := cs.c.GetAllJobs()
+func (cs *CServer) GetAllJobs(ctx context.Context, req *pbc.GetAllJobsReq) (*pbc.GetAllJobsResp, error) {
+	jobs := cs.C.GetAllJobs()
 
 	jds := []*pbc.JobDetails{}
 
@@ -215,8 +215,8 @@ func (cs *cServer) GetAllJobs(ctx context.Context, req *pbc.GetAllJobsReq) (*pbc
 }
 
 // GetAllJobsForJobSet corresponds to the GetAllJobsForJobSet endpoint for pkg/controller.
-func (cs *cServer) GetAllJobsForJobSet(ctx context.Context, req *pbc.GetAllJobsForJobSetReq) (*pbc.GetAllJobsForJobSetResp, error) {
-	jobs := cs.c.GetAllJobsForJobSet(req.JobSetID)
+func (cs *CServer) GetAllJobsForJobSet(ctx context.Context, req *pbc.GetAllJobsForJobSetReq) (*pbc.GetAllJobsForJobSetResp, error) {
+	jobs := cs.C.GetAllJobsForJobSet(req.JobSetID)
 
 	jds := []*pbc.JobDetails{}
 
@@ -262,8 +262,8 @@ func createProtoStepsFromSteps(inSteps []*controller.Step) []*pbc.Step {
 }
 
 // StartJobSet corresponds to the StartJobSet endpoint for pkg/controller.
-func (cs *cServer) StartJobSet(ctx context.Context, req *pbc.StartJobSetReq) (*pbc.StartJobSetResp, error) {
-	jobSetID, err := cs.c.StartJobSet(req.JstName, req.Cfgs)
+func (cs *CServer) StartJobSet(ctx context.Context, req *pbc.StartJobSetReq) (*pbc.StartJobSetResp, error) {
+	jobSetID, err := cs.C.StartJobSet(req.JstName, req.Cfgs)
 	if err != nil {
 		return &pbc.StartJobSetResp{
 			Success:  false,
@@ -277,8 +277,8 @@ func (cs *cServer) StartJobSet(ctx context.Context, req *pbc.StartJobSetReq) (*p
 }
 
 // GetJobSet corresponds to the GetJobSet endpoint for pkg/controller.
-func (cs *cServer) GetJobSet(ctx context.Context, req *pbc.GetJobSetReq) (*pbc.GetJobSetResp, error) {
-	js, err := cs.c.GetJobSet(req.JobSetID)
+func (cs *CServer) GetJobSet(ctx context.Context, req *pbc.GetJobSetReq) (*pbc.GetJobSetResp, error) {
+	js, err := cs.C.GetJobSet(req.JobSetID)
 	if err != nil {
 		return &pbc.GetJobSetResp{
 			Success:  false,
@@ -310,8 +310,8 @@ func (cs *cServer) GetJobSet(ctx context.Context, req *pbc.GetJobSetReq) (*pbc.G
 }
 
 // GetAllJobSets corresponds to the GetAllJobSets endpoint for pkg/controller.
-func (cs *cServer) GetAllJobSets(ctx context.Context, req *pbc.GetAllJobSetsReq) (*pbc.GetAllJobSetsResp, error) {
-	jss := cs.c.GetAllJobSets()
+func (cs *CServer) GetAllJobSets(ctx context.Context, req *pbc.GetAllJobSetsReq) (*pbc.GetAllJobSetsResp, error) {
+	jss := cs.C.GetAllJobSets()
 
 	jobSets := []*pbc.JobSetDetails{}
 

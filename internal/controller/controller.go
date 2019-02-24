@@ -129,6 +129,26 @@ type Controller struct {
 	errc <-chan error
 }
 
+// Config contains configuration values for a newly-created
+// Controller.
+type Config struct {
+	// prefix for volumes
+	VolPrefix string
+
+	// maximum number of jobs that can run at once
+	MaxJobsRunning int
+}
+
+// Init is the initialization function that should be called on a newly
+// created Controller, in order to initialize some of its configurations.
+func (c *Controller) Init(cfg *Config) {
+	c.volPrefix = cfg.VolPrefix
+
+	// perhaps split into sub-categories like long-running jobs,
+	// IO-heavy or CPU-heavy or network-heavy jobs, etc.
+	c.maxJobsRunning = cfg.MaxJobsRunning
+}
+
 // tryToStart tries to start the controller for regular operation. This means:
 // (1) starting the JobController; and (2) starting the JobSet processing
 // loop. It will return nil on success or an error message if for some reason
@@ -149,9 +169,6 @@ func (c *Controller) tryToStart() error {
 	// for the time being, we'll manually set the maximum number of
 	// jobs that we'll allow to run concurrently
 	// as we get more familiar with peridot, this should be configurable,
-	// and perhaps split into sub-categories like long-running jobs,
-	// IO-heavy or CPU-heavy or network-heavy jobs, etc.
-	c.maxJobsRunning = 10
 
 	// build configuration for JobController
 	agents := map[string]jobcontroller.AgentRef{}
