@@ -9,6 +9,19 @@ import (
 	pbc "github.com/swinslow/peridot-core/pkg/controller"
 )
 
+// Start corresponds to the Start endpoint for pkg/controller.
+func (cs *cServer) Start(ctx context.Context, req *pbc.StartReq) (*pbc.StartResp, error) {
+	err := cs.c.Start()
+	if err == nil {
+		return &pbc.StartResp{Starting: true}, nil
+	}
+
+	return &pbc.StartResp{
+		Starting: false,
+		ErrorMsg: err.Error(),
+	}, nil
+}
+
 // GetStatus corresponds to the GetStatus endpoint for pkg/controller.
 func (cs *cServer) GetStatus(ctx context.Context, req *pbc.GetStatusReq) (*pbc.GetStatusResp, error) {
 	runStatus, healthStatus, outputMsg, errorMsg := cs.c.GetStatus()
@@ -19,6 +32,12 @@ func (cs *cServer) GetStatus(ctx context.Context, req *pbc.GetStatusReq) (*pbc.G
 		OutputMsg:    outputMsg,
 		ErrorMsg:     errorMsg,
 	}, nil
+}
+
+// Stop corresponds to the Stop endpoint for pkg/controller.
+func (cs *cServer) Stop(ctx context.Context, req *pbc.StopReq) (*pbc.StopResp, error) {
+	cs.c.Stop()
+	return &pbc.StopResp{}, nil
 }
 
 // AddAgent corresponds to the AddAgent endpoint for pkg/controller.
@@ -242,6 +261,21 @@ func createProtoStepsFromSteps(inSteps []*controller.Step) []*pbc.Step {
 	return steps
 }
 
+// StartJobSet corresponds to the StartJobSet endpoint for pkg/controller.
+func (cs *cServer) StartJobSet(ctx context.Context, req *pbc.StartJobSetReq) (*pbc.StartJobSetResp, error) {
+	jobSetID, err := cs.c.StartJobSet(req.JstName, req.Cfgs)
+	if err != nil {
+		return &pbc.StartJobSetResp{
+			Success:  false,
+			ErrorMsg: err.Error(),
+		}, nil
+	}
+	return &pbc.StartJobSetResp{
+		Success:  true,
+		JobSetID: jobSetID,
+	}, nil
+}
+
 // GetJobSet corresponds to the GetJobSet endpoint for pkg/controller.
 func (cs *cServer) GetJobSet(ctx context.Context, req *pbc.GetJobSetReq) (*pbc.GetJobSetResp, error) {
 	js, err := cs.c.GetJobSet(req.JobSetID)
@@ -268,7 +302,6 @@ func (cs *cServer) GetJobSet(ctx context.Context, req *pbc.GetJobSetReq) (*pbc.G
 		TemplateName: js.TemplateName,
 		St:           st,
 		Steps:        steps,
-		CurrentStep:  js.CurrentStep,
 	}
 	return &pbc.GetJobSetResp{
 		Success: true,
@@ -299,7 +332,6 @@ func (cs *cServer) GetAllJobSets(ctx context.Context, req *pbc.GetAllJobSetsReq)
 			TemplateName: js.TemplateName,
 			St:           st,
 			Steps:        steps,
-			CurrentStep:  js.CurrentStep,
 		}
 
 		jobSets = append(jobSets, jsd)

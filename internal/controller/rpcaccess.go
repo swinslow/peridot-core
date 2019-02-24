@@ -24,6 +24,12 @@ func (c *Controller) GetStatus() (pbs.Status, pbs.Health, string, string) {
 	return c.runStatus, c.healthStatus, c.outputMsg, c.errorMsg
 }
 
+// Stop tries to stop the Controller.
+func (c *Controller) Stop() {
+	// do not grab a lock; we're just hitting the cancel button
+	c.controllerCancel()
+}
+
 // AddAgent asks the Controller to add the requested new agent,
 // prior to starting the JobController. It returns nil if the agent
 // is added to the configuration structure for JobController, or a
@@ -260,6 +266,33 @@ func cloneSteps(inSteps []*Step) []*Step {
 		steps = append(steps, newStep)
 	}
 	return steps
+}
+
+// StartJobSet sends a request to start a JobSet with the given template
+// name and configuration.
+func (c *Controller) StartJobSet(jstName string, cfg []*pbc.JobSetConfig) (uint64, error) {
+	// create a JobSetRequest
+	jsr := JobSetRequest{TemplateName: jstName}
+
+	// copy Configs one-by-one
+	jsr.Configs = map[string]string{}
+	for _, jsConfig := range cfg {
+		jsr.Configs[jsConfig.Key] = jsConfig.Value
+	}
+
+	// grab a writer lock, just long enough to reserve a JobSet ID
+	var requestedJobSetID uint64
+	c.m.Lock()
+	requestedJobSetID = c.nextJobSetID
+	c.nextJobSetID++
+	c.m.Unlock()
+
+	jsr.RequestedJobSetID = requestedJobSetID
+
+	// submit the JobSetRequest
+	c.inJobSetStream <- jsr
+
+	return jsr.RequestedJobSetID, nil
 }
 
 // GetJobSet requests information about the JobSet with the given ID.

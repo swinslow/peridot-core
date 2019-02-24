@@ -95,6 +95,9 @@ type Controller struct {
 
 	// ===== channels and contexts =====
 
+	// controllerCancel is the CancelFunc associated with the Controller.
+	controllerCancel context.CancelFunc
+
 	// jobControllerCancel is the CancelFunc associated with the JobController.
 	jobControllerCancel context.CancelFunc
 
@@ -163,9 +166,9 @@ func (c *Controller) tryToStart() error {
 	cfg := jobcontroller.Config{Agents: agents}
 
 	// start JobController
-	ctx, cancel := context.WithCancel(context.Background())
-	c.jobControllerCancel = cancel
-	c.inJobStream, c.inJobUpdateStream, c.jobRecordStream, c.errc = jobcontroller.JobController(ctx, cfg)
+	jcCtx, jcCancel := context.WithCancel(context.Background())
+	c.jobControllerCancel = jcCancel
+	c.inJobStream, c.inJobUpdateStream, c.jobRecordStream, c.errc = jobcontroller.JobController(jcCtx, cfg)
 
 	// create and register the channel for submitting requests to start new JobSets
 	c.inJobSetStream = make(chan JobSetRequest)
@@ -178,7 +181,9 @@ func (c *Controller) tryToStart() error {
 	c.m.Unlock()
 
 	// then start JobSet processing loop
-	go c.jobSetProcessorLoop(ctx)
+	cCtx, cCancel := context.WithCancel(context.Background())
+	c.controllerCancel = cCancel
+	go c.jobSetProcessorLoop(cCtx)
 
 	return nil
 }

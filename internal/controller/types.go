@@ -160,6 +160,9 @@ type JobSetRequest struct {
 	// the configuration values for this JobSet instance
 	Configs map[string]string
 
+	// the requested JobSet ID, if we are requesting one in this JSR
+	RequestedJobSetID uint64
+
 	// parent JobSet, if being created as a sub-JobSet
 	ParentJobSetID uint64
 

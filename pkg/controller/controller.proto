@@ -120,9 +120,7 @@ message GetStatusResp {
 message StopReq {}
 
 // StopResp tells whether the Controller could try to stop.
-message StopResp {
-    bool stopping = 1;
-}
+message StopResp {}
 
 // ===== Agents =====
 
@@ -357,17 +355,11 @@ message StartJobSetResp {
     // was the JobSet successfully started?
     bool success = 1;
 
-    // new JobSet ID
+    // new JobSet ID, if successful
     uint64 jobSetID = 2;
 
-    // all the jobs (with their IDs and step IDs) in this JobSet
-    repeated GetJobResp jobs = 3;
-
-    // any output messages
-    string outputMsg = 4;
-
     // any error messages; should only be set if success == false
-    string errorMsg = 5;
+    string errorMsg = 3;
 }
 
 // GetJobSetReq requests information on the specified JobSet's status.
