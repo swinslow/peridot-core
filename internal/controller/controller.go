@@ -142,11 +142,26 @@ type Config struct {
 // Init is the initialization function that should be called on a newly
 // created Controller, in order to initialize some of its configurations.
 func (c *Controller) Init(cfg *Config) {
+	// fill in values from configuration
 	c.volPrefix = cfg.VolPrefix
 
 	// perhaps split into sub-categories like long-running jobs,
 	// IO-heavy or CPU-heavy or network-heavy jobs, etc.
 	c.maxJobsRunning = cfg.MaxJobsRunning
+
+	// create mutex and set default values
+	c.m = &sync.RWMutex{}
+	c.runStatus = pbs.Status_STARTUP
+	c.healthStatus = pbs.Health_OK
+
+	// and create data holders
+	c.agents = make(map[string]pbc.AgentConfig)
+	c.jobs = make(map[uint64]*Job)
+	c.activeJobs = make(map[uint64]*Job)
+	c.jobSets = make(map[uint64]*JobSet)
+	c.activeJobSets = make(map[uint64]*JobSet)
+	c.pendingJSRs = list.New()
+	c.jobSetTemplates = make(map[string]*JobSetTemplate)
 }
 
 // tryToStart tries to start the controller for regular operation. This means:
