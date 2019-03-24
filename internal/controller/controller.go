@@ -209,6 +209,9 @@ func (c *Controller) tryToStart() error {
 	// create the list for pending JSR requests
 	c.pendingJSRs = list.New()
 
+	// set status to running
+	c.runStatus = pbs.Status_RUNNING
+
 	// unlocking now
 	c.m.Unlock()
 

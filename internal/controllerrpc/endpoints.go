@@ -4,6 +4,7 @@ package controllerrpc
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/swinslow/peridot-core/internal/controller"
 	pbc "github.com/swinslow/peridot-core/pkg/controller"
@@ -263,6 +264,11 @@ func createProtoStepsFromSteps(inSteps []*controller.Step) []*pbc.Step {
 
 // StartJobSet corresponds to the StartJobSet endpoint for pkg/controller.
 func (cs *CServer) StartJobSet(ctx context.Context, req *pbc.StartJobSetReq) (*pbc.StartJobSetResp, error) {
+	fmt.Printf("In StartJobSet, req is %#v\n", req)
+	for _, cfg := range req.Cfgs {
+		fmt.Printf("  - key: %s\n", cfg.Key)
+		fmt.Printf("    value: %s\n", cfg.Value)
+	}
 	jobSetID, err := cs.C.StartJobSet(req.JstName, req.Cfgs)
 	if err != nil {
 		return &pbc.StartJobSetResp{

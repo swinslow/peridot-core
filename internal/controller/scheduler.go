@@ -3,6 +3,7 @@
 package controller
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/swinslow/peridot-core/internal/jobcontroller"
@@ -16,7 +17,9 @@ import (
 func (c *Controller) runScheduler() {
 	// grab a writer lock
 	c.m.Lock()
+	fmt.Printf("===> ENTERING runScheduler")
 	defer c.m.Unlock()
+	defer fmt.Printf("===> LEAVING runScheduler")
 
 	// first, remove any stopped jobs from the active list, and update
 	// corresponding JobSets' statuses
