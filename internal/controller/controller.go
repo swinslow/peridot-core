@@ -183,7 +183,11 @@ func (c *Controller) tryToStart() error {
 
 	// for the time being, we'll manually set the maximum number of
 	// jobs that we'll allow to run concurrently
-	// as we get more familiar with peridot, this should be configurable,
+	// as we get more familiar with peridot, this should be configurable.
+
+	// set initial jobset and job IDs
+	c.nextJobSetID = 1
+	c.nextJobID = 1
 
 	// build configuration for JobController
 	agents := map[string]jobcontroller.AgentRef{}
@@ -230,24 +234,40 @@ func (c *Controller) jobSetProcessorLoop(ctx context.Context) {
 	exiting := false
 
 	for !exiting {
+		// ===== DEBUG START =====
+		fmt.Printf("***************************\n")
+		fmt.Printf("***** c.jobs: %#v\n", c.jobs)
+		for jid, j := range c.jobs {
+			fmt.Printf("*****     c.jobs[%d]: run %s, health %s,\terrorMessages: %s\n", jid, j.Status.RunStatus.String(), j.Status.HealthStatus.String(), j.Status.ErrorMessages)
+		}
+		fmt.Printf("***** c.jobSets: %#v\n", c.jobSets)
+		for jsid, js := range c.jobSets {
+			fmt.Printf("*****     c.jobSets[%d]: run %s, health %s\n", jsid, js.RunStatus.String(), js.HealthStatus.String())
+		}
+		fmt.Printf("***************************\n")
+		// ===== DEBUG END =====
 		select {
 		case <-ctx.Done():
+			fmt.Printf("***** case <-ctx.Done()\n")
 			// the Controller has been cancelled and should shut down
 			exiting = true
 		case jsr := <-c.inJobSetStream:
+			fmt.Printf("***** case jsr := <-c.inJobSetStream\n")
 			// add the request to the pending queue
 			c.pendingJSRs.PushBack(jsr)
 			// create new JobSets from the pending queue
 			c.createNewJobSets()
-			c.runScheduler()
+			// c.runScheduler()
 		case jr := <-c.jobRecordStream:
+			fmt.Printf("***** case jr := <-c.jobRecordStream\n")
 			c.updateJobStatus(&jr)
-			c.runScheduler()
+			// c.runScheduler()
 		case err := <-c.errc:
 			// an error on errc signals a significant problem in either the
 			// Controller or the JobController, such as two Jobs that were
 			// submitted with the same JobID. The Controller should be moved
 			// into an error state and should shut down.
+			fmt.Printf("***** case err := <-c.errc\n")
 			c.m.Lock()
 			c.healthStatus = pbs.Health_ERROR
 			c.errorMsg += err.Error() + "\n"

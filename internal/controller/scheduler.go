@@ -17,9 +17,9 @@ import (
 func (c *Controller) runScheduler() {
 	// grab a writer lock
 	c.m.Lock()
-	fmt.Printf("===> ENTERING runScheduler")
+	fmt.Println("===> ENTERING runScheduler")
 	defer c.m.Unlock()
-	defer fmt.Printf("===> LEAVING runScheduler")
+	defer fmt.Println("===> LEAVING runScheduler")
 
 	// first, remove any stopped jobs from the active list, and update
 	// corresponding JobSets' statuses
@@ -49,11 +49,22 @@ func (c *Controller) runScheduler() {
 	// we have capacity for new jobs. start walking through the active
 	// jobSets, check for ready jobs and add them as we go.
 	for _, js := range c.activeJobSets {
+		// if this jobset was still in STARTUP status, it's now running
+		if js.RunStatus == pbs.Status_STARTUP {
+			js.RunStatus = pbs.Status_RUNNING
+		}
+
 		readyAgentSteps := c.getReadyStepsForJobSet(js)
 		for _, readyAgent := range readyAgentSteps {
 			// ready to submit this as a new Job to run
 			jobID := c.nextJobID
 			c.nextJobID++
+
+			// update corresponding step with job ID, now that we know it
+			readyAgent.AgentJobID = jobID
+
+			// and tell this Step that it is now running
+			readyAgent.RunStatus = pbs.Status_RUNNING
 
 			// create the Job's configuration
 			cfg := c.getJobConfigForStep(readyAgent)
@@ -76,9 +87,6 @@ func (c *Controller) runScheduler() {
 			// add it to the main jobs and active jobs maps
 			c.jobs[jobID] = job
 			c.activeJobs[jobID] = job
-
-			// update corresponding step with job ID, now that we know it
-			readyAgent.AgentJobID = jobID
 
 			// now, create a JobRequest
 			// we do this _after_ adding to main jobs / active jobs maps
@@ -161,21 +169,3 @@ func (c *Controller) getReadyStepsForJobSet(js *JobSet) []*Step {
 	// now, return the agent steps that are ready to run
 	return readyAgentSteps
 }
-
-// // getReadyJobs returns a slice of all Jobs within this JobSet that are
-// // ready to be run, if any. It returns nil if no Jobs are currently ready,
-// // and returns a non-nil error if a preceding Job has errored out.
-// //func (c *Controller) getReadyJobs(js *JobSet) []*Job
-
-// // runCoordinator tries to take further action on this JobSet if
-// // more is currently possible. For example, if it can proceed to the
-// // next step, then it will do so and will submit the corresponding Job
-// // to the JobController.
-// func (c *Controller) runCoordinator(js *JobSet) {
-// 	// check (and if needed, update) the current step's status
-// 	step := findStepInSteps(js.Steps, js.CurrentStep)
-// 	if step == nil {
-// 		// there's a problem: CurrentStep points to an invalid step ID
-// 		return
-// 	}
-// }
