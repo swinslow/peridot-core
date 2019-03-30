@@ -3,6 +3,7 @@
 package controller
 
 import (
+	"container/list"
 	"fmt"
 	"time"
 
@@ -105,6 +106,9 @@ func (c *Controller) createNewJobSets() {
 
 		// and we're done with this one!
 	}
+
+	// now, dump and recreate pendingJSRs because these have now been handled
+	c.pendingJSRs = list.New()
 }
 
 // updateJobStatus updates the status of the Job with the ID noted in the
