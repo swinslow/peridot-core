@@ -257,11 +257,9 @@ func (c *Controller) jobSetProcessorLoop(ctx context.Context) {
 			c.pendingJSRs.PushBack(jsr)
 			// create new JobSets from the pending queue
 			c.createNewJobSets()
-			// c.runScheduler()
 		case jr := <-c.jobRecordStream:
 			fmt.Printf("***** case jr := <-c.jobRecordStream\n")
 			c.updateJobStatus(&jr)
-			// c.runScheduler()
 		case err := <-c.errc:
 			// an error on errc signals a significant problem in either the
 			// Controller or the JobController, such as two Jobs that were

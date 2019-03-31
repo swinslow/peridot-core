@@ -4,6 +4,7 @@ package controller
 
 import (
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/swinslow/peridot-core/internal/jobcontroller"
@@ -117,8 +118,82 @@ func (c *Controller) runScheduler() {
 func (c *Controller) updateJobSetStatusForJob(job *Job) {
 	// don't grab a writer lock; runScheduler already has one
 
-	// ===== FIXME COMPLETE =====
-	// ===== FIXME BE SURE TO HANDLE ERROR STATUS APPROPRIATELY =====
+	// find the corresponding jobSet
+	js, ok := c.jobSets[job.JobSetID]
+	if !ok {
+		// FIXME this shouldn't happen; job with unknown jobSet ID
+		log.Fatalf("failed; job ID %d has unknown job set ID %d", job.JobID, job.JobSetID)
+	}
+
+	newStatus, newHealth := c.determineStepStatuses(js.Steps)
+	if newStatus != pbs.Status_STATUS_SAME {
+		js.RunStatus = newStatus
+	}
+	if newHealth != pbs.Health_HEALTH_SAME {
+		js.HealthStatus = newHealth
+	}
+}
+
+// determineStepStatuses takes a slice of steps and walks through it
+// (recursively if needed), looking at what the overall RunStatus and
+// HealthStatus should now be. It returns the new statuses.
+// It also updates the status/health of concurrent steps as needed.
+func (c *Controller) determineStepStatuses(steps []*Step) (pbs.Status, pbs.Health) {
+	allStopped := true
+	newStatus := pbs.Status_STATUS_SAME
+	newHealth := pbs.Health_HEALTH_SAME
+
+	for _, step := range steps {
+		// first, if concurrent, get sub-steps' own status and health
+		// so we can update the concurrent step itself
+		if step.T == StepTypeConcurrent {
+			// run recursively on sub-steps
+			subStatus, subHealth := c.determineStepStatuses(step.ConcurrentSteps)
+
+			if subStatus != pbs.Status_STATUS_SAME {
+				step.RunStatus = subStatus
+			}
+			if subHealth != pbs.Health_HEALTH_SAME {
+				step.HealthStatus = subHealth
+			}
+		}
+
+		// if jobset, get the separate jobSet's status and health
+		if step.T == StepTypeJobSet {
+			subJs, ok := c.jobSets[step.SubJobSetID]
+			if !ok {
+				// FIXME this shouldn't happen; job with unknown jobSet ID
+				log.Fatalf("failed; jobset step %d in jobset %d has unknown subJobSet ID %d", step.StepID, step.JobSetID, step.SubJobSetID)
+			}
+			step.RunStatus = subJs.RunStatus
+			step.HealthStatus = subJs.HealthStatus
+		}
+
+		// now, evaluate and bubble upwards for this step
+		// if it is still running or in startup, check health but go on
+		if step.RunStatus != pbs.Status_STOPPED {
+			allStopped = false
+		}
+		// check and update health
+		// note degraded, unless we're already in error state
+		if step.HealthStatus == pbs.Health_DEGRADED && newHealth != pbs.Health_ERROR {
+			newHealth = pbs.Health_DEGRADED
+		}
+		// and error health means the overall set of steps will be in error
+		// and should also stop
+		if step.HealthStatus == pbs.Health_ERROR {
+			newStatus = pbs.Status_STOPPED
+			newHealth = pbs.Health_ERROR
+		}
+	}
+
+	// finally, decide what to bubble upwards now that we've looked at
+	// all of the steps
+	if allStopped {
+		newStatus = pbs.Status_STOPPED
+	}
+
+	return newStatus, newHealth
 }
 
 // getReadyStepsForJobSet takes a JobSet and returns a slice of pointers

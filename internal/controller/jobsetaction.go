@@ -5,9 +5,11 @@ package controller
 import (
 	"container/list"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/swinslow/peridot-core/internal/jobcontroller"
+	pba "github.com/swinslow/peridot-core/pkg/agent"
 	pbs "github.com/swinslow/peridot-core/pkg/status"
 )
 
@@ -129,6 +131,27 @@ func (c *Controller) updateJobStatus(jr *jobcontroller.JobRecord) {
 		return
 	}
 
-	// update status
+	// update this job's status
 	job.Status = jr.Status
+
+	// also update the status of the corresponding step
+	// (runScheduler will be responsible for updating dependent steps)
+	js, ok := c.jobSets[job.JobSetID]
+	if !ok {
+		// FIXME this shouldn't happen; job with unknown jobSet ID
+		log.Fatalf("failed; job ID %d has unknown job set ID %d", job.JobID, job.JobSetID)
+	}
+	for _, step := range js.Steps {
+		if step.T == StepTypeAgent && step.AgentJobID == job.JobID {
+			if job.Status.RunStatus == pba.JobRunStatus_STOPPED {
+				step.RunStatus = pbs.Status_STOPPED
+			}
+			if job.Status.HealthStatus == pba.JobHealthStatus_DEGRADED {
+				step.HealthStatus = pbs.Health_DEGRADED
+			}
+			if job.Status.HealthStatus == pba.JobHealthStatus_ERROR {
+				step.HealthStatus = pbs.Health_ERROR
+			}
+		}
+	}
 }
